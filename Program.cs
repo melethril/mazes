@@ -2,13 +2,16 @@
 using Mazes.Renderers.Bitmap;
 using Mazes.Utils;
 
-const string basePath = @"C:\Users\Martin\Downloads\Mazes\";
+string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+Console.WriteLine(userFolder);
+string basePath = Path.Combine(userFolder, @"Downloads\Mazes");
 
-var gridSize = (rows: 20, cols: 20);
+
+var gridSize = (rows: 30, cols: 30);
 var imageSize = Dimensions.A4Landscape.Scale(7f);
 
 // Generate a maze
-var maze = Maze.Random(gridSize, seed: 12345);
+var maze = Maze.Random(gridSize, new RecursiveBacktrackerAlgorithm());//, seed: 12345);
 
 // Calculate longest path
 var path = Distances.CalculateLongestPath(maze);

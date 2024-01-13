@@ -81,12 +81,18 @@ namespace Mazes
             return path;
         }
 
-        public (Cell cell, int distance) Max()
+        public (Cell cell, int distance) Max(bool onEdge)
         {
             int maxDistance = 0;
             Cell maxCell = root;
 
-            foreach (var (cell, distance) in cells)
+            var possibleCells = cells.AsEnumerable();
+            if (onEdge)
+            {
+                possibleCells = possibleCells.Where(o => o.Key.IsOnEdge);
+            }
+
+            foreach (var (cell, distance) in possibleCells)
             {
                 if (distance > maxDistance)
                 {
@@ -99,14 +105,14 @@ namespace Mazes
         }
 
 
-        public static (Cell start, Cell end, Distances path, Distances distances) CalculateLongestPath(Maze maze)
+        public static (Cell start, Cell end, Distances path, Distances distances) CalculateLongestPath(Maze maze, bool startOnEdge = true, bool endOnEdge = true)
         {
             var start = maze[0, 0]!;
             var distances = Calculate(start);
-            var (maxCell, _) = distances.Max();
+            var (maxCell, _) = distances.Max(startOnEdge);
 
             var distances2 = Calculate(maxCell);
-            var (goalCell, _) = distances2.Max();
+            var (goalCell, _) = distances2.Max(endOnEdge);
             var path = distances2.PathTo(goalCell);
 
             return (maxCell, goalCell, path, distances2);

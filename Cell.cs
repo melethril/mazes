@@ -1,9 +1,6 @@
-using System.Runtime.Serialization;
-
 namespace Mazes
 {
-    [Serializable]
-    public sealed class Cell : ISerializable
+    public class Cell
     {
         public int Row { get; }
         public int Column { get; }
@@ -16,8 +13,10 @@ namespace Mazes
         public bool IsAtWestEdge => West == null;
         public bool IsAtEastEdge => East == null;
         public bool IsAtSouthEdge => South == null;
+        public bool IsOnEdge => new Cell? [] {North, East, South, West}.Any(d => d == null);
+        public bool IsDeadEnd => links.Count == 1;
 
-        public IList<CellAttribute> Attributes { get; } = new List<CellAttribute>();
+        public IList<CellAttribute> Attributes { get; } = [];
 
         private readonly Dictionary<Cell, bool> links = [];
 
@@ -54,22 +53,6 @@ namespace Mazes
         {
             Row = row;
             Column = column;
-        }
-
-        private Cell(SerializationInfo info, StreamingContext context)
-        {
-            throw new NotImplementedException();
-            // n1 = info.GetInt32("i");
-            // n2 = info.GetInt32("j");
-            // str = info.GetString("k");
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            throw new NotImplementedException();
-            // info.AddValue("i", n1);
-            // info.AddValue("j", n2);
-            // info.AddValue("k", str);
         }
 
     }

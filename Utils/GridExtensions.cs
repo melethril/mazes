@@ -91,7 +91,7 @@ namespace Mazes
         private static float? GetIntensity(Distances distances, Cell cell)
         {
             int? distance = distances[cell];
-            int maxDistance = distances.Max().distance;
+            int maxDistance = distances.Max(onEdge: false).distance;
             if (distance == null) return null;
 
             float intensity = (float)(maxDistance - distance.Value) / maxDistance;

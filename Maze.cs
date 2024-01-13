@@ -24,7 +24,7 @@ namespace Mazes
 
         public static Maze Random(int rows, int columns, IMazeAlgorithm? algorithm = null, int? seed = null)
         {
-            algorithm ??= new HuntAndKill();
+            algorithm ??= new RecursiveBacktrackerAlgorithm();
 
             var random = seed == null 
                 ? new Random()
