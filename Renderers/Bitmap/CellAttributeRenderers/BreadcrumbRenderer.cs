@@ -5,19 +5,21 @@ namespace Mazes.Renderers.Bitmap
     internal class BreadcrumbRenderer : ICellAttributeRenderer
     {
         public int Order => 0;
+        private const int MinPillSize = 2;
 
-        public void Render(RenderContext context)
+        public void Render(CellAttributeRenderingContext context)
         {
-            var bounds = context.CellBounds;
-            int pillSize = bounds.Width / 12;
+            SKRectI bounds = context.Bounds;
+            int pillSize = Math.Max(bounds.Width / 24, MinPillSize);
             int centreX = bounds.Left + (bounds.Width / 2);
             int centreY = bounds.Top + (bounds.Height / 2);
 
-            var fill = new SKPaint { Style = SKPaintStyle.Fill, Color = SKColors.MediumSeaGreen };
-            var stroke = new SKPaint { Style = SKPaintStyle.Stroke, Color = SKColors.DarkGray, StrokeWidth = 1 };
+            var point = new SKPoint(centreX, centreY);
+            using var fill = new SKPaint { Style = SKPaintStyle.Fill, Color = SKColors.DimGray };
+            using var stroke = new SKPaint { Style = SKPaintStyle.Stroke, Color = SKColors.DimGray, StrokeWidth = 1 };
 
-            context.Canvas.DrawCircle(new SKPoint(centreX, centreY), pillSize, fill);
-            context.Canvas.DrawCircle(new SKPoint(centreX, centreY), pillSize, stroke);
+            context.Canvas.DrawCircle(point, pillSize, fill);
+            context.Canvas.DrawCircle(point, pillSize, stroke);
         }
     }
 }

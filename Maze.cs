@@ -1,104 +1,118 @@
 namespace Mazes
 {
-    public class Maze
+    public abstract class Maze
     {
-        public int Rows { get; }
-        public int Columns { get; }
-        public int Size => Rows * Columns;
+        public int RowCount { get; }
+        public int ColumnCount { get; }
+        public virtual int Size => RowCount * ColumnCount;
 
-        private readonly Cell[][] grid;
+        protected readonly ICell[][] grid;
 
-        private Maze(int rows, int columns)
+        public Maze(int rows, int columns, ICell[][] grid)
         {
-            Rows = rows;
-            Columns = columns;
+            RowCount = rows;
+            ColumnCount = columns;
+            this.grid = grid;
 
-            grid = PrepareGrid();
             ConfigureCells();
         }
 
-        public static Maze Empty(int rows, int columns)
+        protected void ConfigureCells()
         {
-            return new Maze(rows, columns);
-        }
-
-        public static Maze Random(int rows, int columns, IMazeAlgorithm? algorithm = null, int? seed = null)
-        {
-            algorithm ??= new RecursiveBacktrackerAlgorithm();
-
-            var random = seed == null 
-                ? new Random()
-                : new Random(seed.Value);
-
-            var grid = Empty(rows, columns);
-
-            return algorithm.Apply(grid, random);
-        }
-
-        public static Maze Random((int rows, int columns) size, IMazeAlgorithm? algorithm = null, int? seed = null) => 
-            Random(size.rows, size.columns, algorithm, seed);
-
-        protected virtual Cell[][] PrepareGrid()
-        {
-            var rows = new Cell[Rows][];
-
-            for (int i = 0; i < Rows; i++)
+            foreach (var cell in this.AllCells)
             {
-                var row = new Cell[Columns];
+                var (rowIndex, colIndex) = (cell.RowIndex, cell.ColumnIndex);
 
-                for (int j = 0; j < Columns; j++)
-                {
-                    row[j] = new Cell(i, j);
-                }
+                if (rowIndex == 0 || colIndex == 0 || rowIndex == RowCount - 1 || colIndex == ColumnCount - 1)
+                    cell.IsOnOuterEdge = true;
 
-                rows[i] = row;
-            }
+                TryGetCellAt(rowIndex - 1, colIndex, out ICell? north);
+                TryGetCellAt(rowIndex + 1, colIndex, out ICell? south);
+                TryGetCellAt(rowIndex, colIndex + 1, out ICell? east);
+                TryGetCellAt(rowIndex, colIndex - 1, out ICell? west);
 
-            return rows;
-        }
+                if (cell.IsPathable)
+                    SetupPathableCell(cell, north, south, east, west);
+                else
+                    SetupNonPathableCell(cell, north, south, east, west);
 
-        protected virtual void ConfigureCells()
-        {
-            foreach (var cell in Cells)
-            {
-                var (row, col) = (cell.Row, cell.Column);
-
-                cell.North = this[row - 1, col];
-                cell.South = this[row + 1, col];
-                cell.East = this[row, col + 1];
-                cell.West = this[row, col - 1];
             }
         }
 
-        public Cell? this[int row, int column]
+        private static void SetupPathableCell(ICell cell, ICell? north, ICell? south, ICell? east, ICell? west)
+        {
+            cell.North = north?.IsPathable == true ? north : null;
+            cell.South = south?.IsPathable == true ? south : null;
+            cell.East = east?.IsPathable == true ? east : null;
+            cell.West = west?.IsPathable == true ? west : null;
+        }
+
+        private static void SetupNonPathableCell(ICell cell, ICell? north, ICell? south, ICell? east, ICell? west)
+        {
+            cell.North = north;
+            cell.South = south;
+            cell.East = east;
+            cell.West = west;
+            const bool bidirectional = false;
+
+            if (cell.North?.IsPathable == false)
+                cell.Link(cell.North, bidirectional);
+            if (cell.South?.IsPathable == false)
+                cell.Link(cell.South, bidirectional);
+            if (cell.East?.IsPathable == false)
+                cell.Link(cell.East, bidirectional);
+            if (cell.West?.IsPathable == false)
+                cell.Link(cell.West, bidirectional);
+        }
+
+        private bool IsInBounds(int row, int column)
+        {
+            if (row < 0 || row >= RowCount) return false;
+            if (column < 0 || column >= ColumnCount) return false;
+
+            return true;
+        }
+
+        private bool TryGetCellAt(int row, int column, out ICell? cell)
+        {
+            cell = IsInBounds(row, column) ? this[row, column] : null;
+
+            return cell != null;
+        }
+
+        public ICell this[int row, int column]
         {
             get
             {
-                if (row < 0 || row >= Rows) return null;
-                if (column < 0 || column >= Columns) return null;
+                if (!IsInBounds(row, column))
+                    throw new IndexOutOfRangeException($"Cell index out of bounds: ({row}, {column})");
+
                 return grid[row][column];
             }
         }
 
-        public Cell? GetRandomCell(Random random)
-        {
-            int row = random.Next(Rows);
-            int col = random.Next(grid[row].Length);
+        public abstract ICell GetRandomCell(Random random);
 
-            return this[row, col];
-        }
-
-        public IEnumerable<Cell[]> EachRow()
+        public IEnumerable<ICell[]> EachRow()
         {
             return grid.Select(r => r);
         }
 
-        public IEnumerable<Cell> Cells
+        public IEnumerable<ICell> PathableCells
         {
             get
             {
-                return grid.SelectMany(r => r).Where(c => c != null);
+                return grid.SelectMany(r => r).Where(c => c.IsPathable);
             }
         }
+
+        public IEnumerable<ICell> AllCells
+        {
+            get
+            {
+                return grid.SelectMany(r => r);
+            }
+        }
+
     }
 }

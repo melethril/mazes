@@ -9,7 +9,7 @@ namespace Mazes.Utils
 
         public static string GenerateFilename(Maze maze, IMazeAlgorithm? algorithm = null, bool withTimestamp = false)
         {
-            string dims = $"_{maze.Rows}x{maze.Columns}";
+            string dims = $"_{maze.RowCount}x{maze.ColumnCount}";
             string? algName = algorithm != null ? $"_{algorithm.Name.ToLower().Replace(" ", "_")}" : string.Empty;
             string? timestamp = withTimestamp ? $"_{DateTime.UtcNow:yyyyMMdd-HHmmss}.png" : string.Empty;
 

@@ -6,11 +6,12 @@ namespace Mazes.Renderers.Bitmap
         {
             { CellAttributeType.Index, () => new CellTextRenderer() },
             { CellAttributeType.Distance, () => new CellTextRenderer() },
-            { CellAttributeType.Path, () => new PathWithDistanceRenderer() },
+            { CellAttributeType.Path, () => new BreadcrumbRenderer() },
             { CellAttributeType.Intensity, () => new IntensityRenderer() },
             { CellAttributeType.IsStartCell, () => new StartCellRenderer() },
             { CellAttributeType.IsTargetCell, () => new TargetCellRenderer() },
             { CellAttributeType.HasGridLines, () => new GridLineRenderer() },
+            { CellAttributeType.IsVoid, () => new VoidCellRenderer() },
         };
 
         public IReadOnlyDictionary<CellAttributeType, Func<ICellAttributeRenderer>> List => list;

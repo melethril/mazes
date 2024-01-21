@@ -7,7 +7,7 @@ namespace Mazes
         public Maze Apply(Maze maze, Random random)
         {
             var startAt = maze.GetRandomCell(random)!;
-            var stack = new Stack<Cell>();
+            var stack = new Stack<ICell>();
             stack.Push(startAt);
 
             while (stack.Any())

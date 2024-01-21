@@ -16,15 +16,15 @@ namespace Mazes.Renderers.Bitmap
             TextSize = textSize,
         };
 
-        public void Render(RenderContext context)
+        public void Render(CellAttributeRenderingContext context)
         {
-            string? text = context.Attribute.GetValueAs<string>();
+            string? text = context.Attribute?.GetValueAs<string>();
             if (string.IsNullOrEmpty(text)) return;
 
-            int textSize = context.CellBounds.Width / 4;
-            var pen = GetTextPen(textSize);
+            int textSize = context.Bounds.Width / 4;
+            using var pen = GetTextPen(textSize);
 
-            context.Canvas.DrawCenteredText(context.CellBounds, text, textSize, pen);
+            context.Canvas.DrawCenteredText(context.Bounds, text, textSize, pen);
         }
     }
 }

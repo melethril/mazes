@@ -8,15 +8,12 @@ namespace Mazes.Renderers.Bitmap
 
         public int Order => 0;
 
-        public void Render(RenderContext context)
+        public void Render(CellAttributeRenderingContext context)
         {
             if (colour == null) return;
+            using SKPaint paint = new() { Style = SKPaintStyle.Fill, Color = colour.Value };
 
-            context.Canvas.DrawRect(context.ContentBounds, new SKPaint
-            {
-                Style = SKPaintStyle.Fill,
-                Color = colour.Value,
-            });
+            context.Canvas.DrawRect(context.ContentBounds, paint);
         }
     }
 }

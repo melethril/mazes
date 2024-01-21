@@ -6,7 +6,7 @@ namespace Mazes.Renderers.Bitmap
     {
         public int Order => 3;
 
-        public void Render(RenderContext context)
+        public void Render(CellAttributeRenderingContext context)
         {
             ICellAttributeRenderer[] renderers = [
                 new BackgroundRenderer(SKColors.LightPink),

@@ -14,14 +14,14 @@ namespace Mazes
 
                 if (unvisitedNeighbours.Any())
                 {
-                    var neighbour = random.Sample(unvisitedNeighbours)!;
+                    ICell neighbour = random.Sample(unvisitedNeighbours)!;
                     current.Link(neighbour);
                     current = neighbour;
                 }
                 else
                 {
                     current = null;
-                    foreach (var cell in maze.Cells)
+                    foreach (var cell in maze.PathableCells)
                     {
                         var visitedNeighbours = cell.Neighbours.Where(n => n.Links.Any()).ToArray();
                         if (!cell.Links.Any() && visitedNeighbours.Any())

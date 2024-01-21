@@ -1,11 +1,11 @@
 namespace Mazes.Renderers.Bitmap
 {
-    public class CellAttributeRenderer<T>(int order, Action<RenderContext>? render) 
+    public class CellAttributeRenderer<T>(int order, Action<CellAttributeRenderingContext>? render) 
         : ICellAttributeRenderer
     {
         public int Order => order;
 
-        public void Render(RenderContext context)
+        public void Render(CellAttributeRenderingContext context)
         {
             if (render == null) return;
 
@@ -13,7 +13,7 @@ namespace Mazes.Renderers.Bitmap
         }
     }
 
-    public class CellAttributeRenderer(int order, Action<RenderContext>? render) 
+    public class CellAttributeRenderer(int order, Action<CellAttributeRenderingContext>? render) 
         : CellAttributeRenderer<object>(order, render)
     {
     }

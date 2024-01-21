@@ -1,29 +1,47 @@
 namespace Mazes
 {
-    public class Cell
+    public class Cell : ICell
     {
-        public int Row { get; }
-        public int Column { get; }
-        public Cell? North { get; set; }
-        public Cell? South { get; set; }
-        public Cell? East { get; set; }
-        public Cell? West { get; set; }
+        public int RowIndex { get; }
+        public int ColumnIndex { get; }
+        public bool IsPathable { get; }
 
-        public bool IsAtNorthEdge => North == null;
-        public bool IsAtWestEdge => West == null;
-        public bool IsAtEastEdge => East == null;
-        public bool IsAtSouthEdge => South == null;
-        public bool IsOnEdge => new Cell? [] {North, East, South, West}.Any(d => d == null);
+        public ICell? North { get; set; }
+        public ICell? South { get; set; }
+        public ICell? East { get; set; }
+        public ICell? West { get; set; }
+
+        public bool HasNorthEdge => North == null;
+        public bool HasWestEdge => West == null;
+        public bool HasEastEdge => East == null;
+        public bool HasSouthEdge => South == null;
+        public bool IsOnEdge => new ICell?[] { North, East, South, West }.Any(d => d == null);
+        public bool IsOnOuterEdge { get; set; }
         public bool IsDeadEnd => links.Count == 1;
-
+        public bool IsVoid  => Attributes.Any(a => a.Type == CellAttributeType.IsVoid);
         public IList<CellAttribute> Attributes { get; } = [];
 
-        private readonly Dictionary<Cell, bool> links = [];
+        private readonly Dictionary<ICell, bool> links = [];
 
-        public IEnumerable<Cell> Links => links.Keys;
-        public bool IsLinked(Cell? cell) => cell != null && links.ContainsKey(cell);
+        public Cell(int row, int column, bool isPathable = true, IList<CellAttribute>? attributes = null)
+        {
+            RowIndex = row;
+            ColumnIndex = column;
+            IsPathable = isPathable;
 
-        public Cell Link(Cell cell, bool bidirectional = true)
+            if (attributes != null && attributes.Any())
+            {
+                foreach( var attr in attributes)
+                {
+                    this.Attributes.Add(attr);
+                }
+            }
+        }
+
+        public IEnumerable<ICell> Links => links.Keys;
+        public bool IsLinked(ICell? cell) => cell != null && links.ContainsKey(cell);
+
+        public ICell Link(ICell cell, bool bidirectional = true)
         {
             links[cell] = true;
             if (bidirectional) cell.Link(this, false);
@@ -31,7 +49,7 @@ namespace Mazes
             return this;
         }
 
-        public Cell Unlink(Cell cell, bool bidirectional = true)
+        public ICell Unlink(ICell cell, bool bidirectional = true)
         {
             links.Remove(cell, out _);
             if (bidirectional) cell.Unlink(this, false);
@@ -39,21 +57,14 @@ namespace Mazes
             return this;
         }
 
-        public IEnumerable<Cell> Neighbours
+        public IEnumerable<ICell> Neighbours
         {
             get
             {
                 return new[] { North, South, East, West }
                     .Where(o => o is not null)
-                    .Cast<Cell>();
+                    .Cast<ICell>();
             }
         }
-
-        public Cell(int row, int column)
-        {
-            Row = row;
-            Column = column;
-        }
-
     }
 }

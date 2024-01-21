@@ -8,9 +8,9 @@ namespace Mazes
         {
             foreach (var row in maze.EachRow())
             {
-                var run = new List<Cell>();
+                var run = new List<ICell>();
 
-                foreach (var cell in row)
+                foreach (var cell in row.Where(c => c.IsPathable))
                 {
                     run.Add(cell);
                     
@@ -20,13 +20,16 @@ namespace Mazes
 
                     if (shouldEndRun)
                     {
-                        Cell? member = random.Sample(run);
-                        if (member?.North is not null) member.Link(member.North);
+                        ICell? member = random.Sample(run);
+                        if (member?.North is not null) 
+                            member.Link(member.North);
+
                         run.Clear();
                     }
                     else
                     {
-                        if (cell.East != null) cell.Link(cell.East);
+                        if (cell.East != null) 
+                            cell.Link(cell.East);
                     }
                 }
             }

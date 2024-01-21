@@ -2,17 +2,17 @@ namespace Mazes
 {
     public class Distances
     {
-        private readonly Cell root;
-        private readonly Dictionary<Cell, int> cells;
+        private readonly ICell root;
+        private readonly Dictionary<ICell, int> cells;
 
-        public Distances(Cell root)
+        public Distances(ICell root)
         {
             this.root = root;
             cells = [];
             cells[root] = 0;
         }
 
-        public int? this[Cell? cell]
+        public int? this[ICell? cell]
         {
             get
             {
@@ -30,16 +30,16 @@ namespace Mazes
             }
         }
 
-        public IEnumerable<Cell> Cells => cells.Keys;
+        public IEnumerable<ICell> Cells => cells.Keys;
 
-        public static Distances Calculate(Cell start)
+        public static Distances Calculate(ICell start)
         {
             var distances = new Distances(start);
-            var frontier = new List<Cell> { start };
+            var frontier = new List<ICell> { start };
 
             while (frontier.Any())
             {
-                var newFrontier = new List<Cell>();
+                var newFrontier = new List<ICell>();
 
                 foreach (Cell cell in frontier)
                 {
@@ -58,7 +58,7 @@ namespace Mazes
             return distances;
         }
 
-        public Distances PathTo(Cell target)
+        public Distances PathTo(ICell target)
         {
             var current = target;
             var path = new Distances(root);
@@ -81,15 +81,15 @@ namespace Mazes
             return path;
         }
 
-        public (Cell cell, int distance) Max(bool onEdge)
+        public (ICell cell, int distance) Max(bool onEdge)
         {
             int maxDistance = 0;
-            Cell maxCell = root;
+            ICell maxCell = root;
 
             var possibleCells = cells.AsEnumerable();
             if (onEdge)
             {
-                possibleCells = possibleCells.Where(o => o.Key.IsOnEdge);
+                possibleCells = possibleCells.Where(o => o.Key.IsOnOuterEdge);
             }
 
             foreach (var (cell, distance) in possibleCells)
@@ -104,10 +104,9 @@ namespace Mazes
             return (maxCell, maxDistance);
         }
 
-
-        public static (Cell start, Cell end, Distances path, Distances distances) CalculateLongestPath(Maze maze, bool startOnEdge = true, bool endOnEdge = true)
+        public static (ICell start, ICell end, Distances path, Distances distances) CalculateLongestPath(Maze maze, bool startOnEdge, bool endOnEdge)
         {
-            var start = maze[0, 0]!;
+            var start = maze.PathableCells.First();
             var distances = Calculate(start);
             var (maxCell, _) = distances.Max(startOnEdge);
 
@@ -117,6 +116,7 @@ namespace Mazes
 
             return (maxCell, goalCell, path, distances2);
         }
+
     }
 }
 

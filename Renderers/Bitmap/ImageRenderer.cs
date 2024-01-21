@@ -4,49 +4,68 @@ namespace Mazes.Renderers.Bitmap
 
     public class ImageRenderer
     {
-        private readonly PageRenderer pageRenderer = new();
-        private readonly CellRenderer cellRenderer = new();
-
-        public SKSurface Render(Maze maze, Dimensions imageSize, int margin = 20)
+        private readonly SKColor imageBackground = SKColors.White;
+        
+        public SKSurface Render(Maze maze, Dimensions imageSize, int margin, int numPaddingCells)
         {
             var pageBounds = CreatePageRect(imageSize, margin);
-            int cellSize = CalculateCellSize(maze, pageBounds, numPaddingCells: 1);
+            int cellSize = CalculateCellSize(maze, pageBounds, numPaddingCells);
             var mazeBounds = CreateMazeRect(maze, pageBounds, cellSize);
 
             var surface = CreateSurface(imageSize);
             var canvas = surface.Canvas;
 
-            pageRenderer.RenderPage(pageBounds, canvas);
-
+            RenderPage(pageBounds, canvas, margin);
             RenderMaze(canvas, maze, mazeBounds, cellSize);
 
             return surface;
         }
 
-        private void RenderMaze(SKCanvas canvas, Maze maze, SKRectI mazeBounds, int cellSize)
+        public void RenderPage(SKRectI pageBounds, SKCanvas canvas, int margin)
         {
-            var cellsAndBounds = maze.Cells
-                .Select(cell => (cell, bounds: GetBoundsForCell(mazeBounds, cellSize, cell)))
-                .ToArray();
+            using SKPaint pageFill = new() 
+            { 
+                IsStroke = false,
+                Color = SKColor.FromHsv(36, 14, 78) 
+            };
 
-            foreach (var (cell, bounds) in cellsAndBounds)
+            canvas.Clear(imageBackground);
+            canvas.DrawRect(pageBounds, pageFill);
+   
+            if (margin > 0)
             {
-                cellRenderer.RenderBackgrounds(canvas, bounds, cell);
-            }
+                using SKPaint pageOutline = new()
+                { 
+                    IsStroke = true,
+                    StrokeWidth = 2,
+                    Color = SKColor.FromHsv(35, 14, 47)
+                };
 
-            foreach (var (cell, bounds) in cellsAndBounds)
-            {
-                cellRenderer.RenderForegrounds(canvas, bounds, cell);
+                canvas.DrawRect(pageBounds, pageOutline);
             }
         }
 
-        private static SKRectI GetBoundsForCell(SKRectI mazeBounds, int cellSize, Cell cell)
+        private static void RenderMaze(SKCanvas canvas, Maze maze, SKRectI mazeBounds, int cellSize)
+        {
+            var cellsAndBounds = maze.AllCells
+                .Select(cell => (cell, bounds: GetBoundsForCell(mazeBounds, cellSize, cell)))
+                .ToArray();
+
+            CellRenderer cellRenderer = new();
+
+            foreach (var (cell, bounds) in cellsAndBounds)
+            {
+                cellRenderer.Render(new CellRenderingContext(canvas, bounds, cell, contentBounds: null));
+            }
+        }
+
+        private static SKRectI GetBoundsForCell(SKRectI mazeBounds, int cellSize, ICell cell)
         {
             return new(
-                left: mazeBounds.Left + (cell.Column * cellSize),
-                top: mazeBounds.Top + (cell.Row * cellSize),
-                right: mazeBounds.Left + ((cell.Column + 1) * cellSize),
-                bottom: mazeBounds.Top + ((cell.Row + 1) * cellSize)
+                left: mazeBounds.Left + (cell.ColumnIndex * cellSize),
+                top: mazeBounds.Top + (cell.RowIndex * cellSize),
+                right: mazeBounds.Left + ((cell.ColumnIndex + 1) * cellSize),
+                bottom: mazeBounds.Top + ((cell.RowIndex + 1) * cellSize)
             );
         }
 
@@ -69,8 +88,8 @@ namespace Mazes.Renderers.Bitmap
 
         private static SKRectI CreateMazeRect(Maze maze, SKRectI page, int cellSize)
         {
-            int mazeWidth = cellSize * maze.Columns;
-            int mazeHeight = cellSize * maze.Rows;
+            int mazeWidth = cellSize * maze.ColumnCount;
+            int mazeHeight = cellSize * maze.RowCount;
 
             int mazeLeft = page.Left + (page.Width / 2) - (mazeWidth / 2);
             int mazeTop = page.Top + (page.Height / 2) - (mazeHeight / 2);
@@ -80,8 +99,8 @@ namespace Mazes.Renderers.Bitmap
 
         private static int CalculateCellSize(Maze maze, SKRectI page, int numPaddingCells)
         {
-            int cellWidth = page.Width / (maze.Columns + (numPaddingCells * 2));
-            int cellHeight = page.Height / (maze.Rows + (numPaddingCells * 2));
+            int cellWidth = page.Width / (maze.ColumnCount + (numPaddingCells * 2));
+            int cellHeight = page.Height / (maze.RowCount + (numPaddingCells * 2));
             int cellSize = Math.Min(cellHeight, cellWidth);
 
             return cellSize;

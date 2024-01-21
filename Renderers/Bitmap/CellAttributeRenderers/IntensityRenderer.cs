@@ -7,9 +7,9 @@ namespace Mazes.Renderers.Bitmap
     {
         public int Order => 0;
 
-        public void Render(RenderContext context)
+        public void Render(CellAttributeRenderingContext context)
         {
-            var attrValue = context.Attribute.GetValueAs<float?>();
+            var attrValue = context.Attribute?.GetValueAs<float?>();
             if (attrValue == null) return;
 
             float intensity = attrValue.Value;

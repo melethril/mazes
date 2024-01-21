@@ -6,13 +6,13 @@ namespace Mazes
 
         public Maze Apply(Maze maze, Random random)
         {
-            Cell cell = maze.GetRandomCell(random)!;
+            ICell cell = maze.GetRandomCell(random)!;
             var unvisited = maze.Size - 1;
 
             while (unvisited > 0)
             {
-                Cell[] neighbours = cell.Neighbours.ToArray();
-                Cell neighbour = random.Sample(neighbours)!;
+                ICell[] neighbours = cell.Neighbours.ToArray();
+                ICell neighbour = random.Sample(neighbours)!;
 
                 if (neighbour.Links.Any() == false)
                 {

@@ -6,9 +6,9 @@ namespace Mazes
 
         public Maze Apply(Maze maze, Random random)
         {
-            foreach (var cell in maze.Cells)
+            foreach (var cell in maze.PathableCells)
             {
-                Cell[] neighbours = new[] { cell.East, cell.North }
+                ICell[] neighbours = new[] { cell.East, cell.North }
                     .Where(cell => cell is not null)
                     .Cast<Cell>()
                     .ToArray();
