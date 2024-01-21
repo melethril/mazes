@@ -5,8 +5,8 @@ namespace Mazes.Core
 {
     public class MazeStyles(JsonObject root)
     {
-        public PageStyles Page = root["Page"]?.Deserialize<PageStyles>() ?? new PageStyles();
-        public JsonObject DefaultCell = root["DefaultCell"]?.AsObject() ?? [];
+        public Dictionary<string, string> Page = root["Page"]?.Deserialize<Dictionary<string, string>>() ?? [];
+        public Dictionary<string, string> DefaultCell = root["DefaultCell"]?.Deserialize<Dictionary<string, string>>() ?? [];
         public JsonArray Attributes = root["Attributes"]?.AsArray() ?? [];
 
         public static MazeStyles LoadFrom(string path)
@@ -18,23 +18,4 @@ namespace Mazes.Core
         }
     }
 
-    public class PageStyles
-    {
-        public int Margin { get; set; } = 0;
-        public int NumPaddingCells { get; set; } = 1;
-    }
-
-    public class CellStyles
-    {
-        public string Colour { get; set; } = "#000000";
-
-        public int StrokeWidth { get; set; } = 6;
-    }
-    
-    public class CellStyles
-    {
-        public string Colour { get; set; } = "#000000";
-
-        public int StrokeWidth { get; set; } = 6;
-    }
 }
