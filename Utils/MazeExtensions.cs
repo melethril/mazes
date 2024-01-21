@@ -12,11 +12,11 @@ namespace Mazes
             renderer.Render(maze, writer);
         }
 
-        public static void RenderAsPng(this Maze maze, string fullPath, Dimensions imageSize, int margin = 0, int numPaddingCells = 1)
+        public static void RenderAsPng(this Maze maze, string fullPath, Dimensions imageSize, int? margin = null, int? numPaddingCells = null)
         {
             var renderer = new ImageRenderer();
 
-            using SKSurface surface = renderer.Render(maze, imageSize, margin, numPaddingCells);
+            using SKSurface surface = renderer.Render(maze, imageSize, margin ?? 0, numPaddingCells ?? 1);
             using SKImage image = surface.Snapshot();
             using SKData data = image.Encode();
             using FileStream file = OpenFile(fullPath);
