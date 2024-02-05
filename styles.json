@@ -1,0 +1,79 @@
+{
+  "image": {
+    "backgroundColour": "#FFFFFF"
+  },
+  "page": {
+    "margin": 0,
+    "numPaddingCells": 2,
+    "wallWidth": 2,
+    "wallColour": "#756958",
+    "backgroundColour": "#c7bcab"
+  },
+  "cells": {
+    "attributes": [
+      {
+        "name": "defaultCell",
+        "properties": {
+          "backgroundColour": "#FFFAEBD7"
+        }
+      },
+      {
+        "name": "breadcrumb",
+        "properties": {
+            "foregroundColour": "#FF87CEEB",
+            "outlineColour": "#FF87CEEB"
+        }
+      },
+      {
+        "name": "breadcrumb.old",
+        "properties": {
+            "foregroundColour": "#FF87CEEB",
+            "outlineColour": "#FF696969"
+        }
+      },
+      {
+        "name": "distance",
+        "properties": {
+          "foregroundColour": "FF000000"
+        }
+      },
+      {
+        "name": "index",
+        "properties": {
+          "foregroundColour": "FF000000"
+        }
+      },
+      {
+        "name": "intensity",
+        "properties": {
+        }
+      },
+      {
+        "name": "pathWithDistance",
+        "properties": {
+          "foregroundColour": "FF000000",
+          "backgroundColour": "FFADD8E6"
+        }
+      },
+      {
+        "name": "startCell",
+        "properties": {
+          "foregroundColour": "FF000000",
+          "backgroundColour": "FF98FB98"
+        }
+      },
+      {
+        "name": "targetCell",
+        "properties": {
+          "foregroundColour": "FF000000",
+          "backgroundColour": "FFFFB6C1"
+        }
+      },
+      {
+        "name": "voidCell",
+        "properties": {
+        }
+      }
+    ]
+  }
+}
