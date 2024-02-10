@@ -1,15 +1,16 @@
-namespace Mazes.Renderers.Bitmap.CellAttributeRenderers
-{
-    internal class DefaultCellRenderer : ICellAttributeRenderer
-    {
-        public int Order => -1;
+using Mazes.Renderers.Bitmap.RenderingContexts;
 
-        public void Render(CellAttributeRenderingContext context)
+namespace Mazes.Renderers.Bitmap.CellAttributeRenderers;
+
+internal class DefaultCellRenderer : ICellAttributeRenderer
+{
+    public int Order => -1;
+
+    public void Render(CellAttributeRenderingContext context)
+    {
+        if (!context.Cell.IsVoid)
         {
-            if (!context.Cell.IsVoid)
-            {
-                context.RenderBackground(context.Style.GetBackgroundColour());
-            }
+            context.RenderBackground(context.Style.GetBackgroundColour());
         }
     }
 }

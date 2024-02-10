@@ -1,7 +1,6 @@
-namespace Mazes.Core
+namespace Mazes.Core;
+
+public class ImageStyles
 {
-    public class ImageStyles
-    {
-        public string BackgroundColour {get;set;} = "#FFF";
-    }
+    public string BackgroundColour { get; set; } = "#FFF";
 }

@@ -1,41 +1,43 @@
-namespace Mazes
+using Mazes.Core;
+using Mazes.Utils;
+
+namespace Mazes.Algorithms;
+
+public class HuntAndKill : IMazeAlgorithm
 {
-    public class HuntAndKill : IMazeAlgorithm
+    public string Name => "Hunt-and-Kill";
+
+    public Grid Apply(Grid grid, Random random)
     {
-        public string Name => "Hunt-and-Kill";
+        var current = grid.GetRandomCell(random);
 
-        public Maze Apply(Maze maze, Random random)
+        while (current != null)
         {
-            var current = maze.GetRandomCell(random);
+            var unvisitedNeighbours = current.Neighbours.Where(n => !n.Links.Any()).ToArray();
 
-            while (current != null)
+            if (unvisitedNeighbours.Any())
             {
-                var unvisitedNeighbours = current.Neighbours.Where(n => !n.Links.Any()).ToArray();
-
-                if (unvisitedNeighbours.Any())
+                ICell neighbour = random.Sample(unvisitedNeighbours)!;
+                current.Link(neighbour);
+                current = neighbour;
+            }
+            else
+            {
+                current = null;
+                foreach (var cell in grid.PathableCells)
                 {
-                    ICell neighbour = random.Sample(unvisitedNeighbours)!;
-                    current.Link(neighbour);
-                    current = neighbour;
-                }
-                else
-                {
-                    current = null;
-                    foreach (var cell in maze.PathableCells)
-                    {
-                        var visitedNeighbours = cell.Neighbours.Where(n => n.Links.Any()).ToArray();
-                        if (!cell.Links.Any() && visitedNeighbours.Any())
-                        { 
-                            current = cell;
-                            var neighbour = random.Sample(visitedNeighbours)!;
-                            current.Link(neighbour);
-                            break;
-                        }
+                    var visitedNeighbours = cell.Neighbours.Where(n => n.Links.Any()).ToArray();
+                    if (!cell.Links.Any() && visitedNeighbours.Any())
+                    { 
+                        current = cell;
+                        var neighbour = random.Sample(visitedNeighbours)!;
+                        current.Link(neighbour);
+                        break;
                     }
                 }
             }
-
-            return maze;
         }
+
+        return grid;
     }
 }

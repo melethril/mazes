@@ -1,9 +1,9 @@
-﻿using Mazes;
-using Mazes.Core;
-using Mazes.Renderers.Bitmap;
+﻿using Mazes.Core;
 using Mazes.Utils;
 
-internal sealed class Program
+namespace MazeTool;
+
+internal static class Program
 {
     private static async Task Main(string[] args)
     {
@@ -13,19 +13,19 @@ internal sealed class Program
             var imageSize = Dimensions.Screen1280x1024;
 
             // Generate a maze
-            Maze maze = BuildMaze(options);
+            IGrid grid = BuildMaze(options);
 
             // Calculate the longest path through the maze
-            var path = maze.CalculateLongestPath(startOnEdge: true, endOnEdge: true);
+            var path = grid.CalculateLongestPath(startOnEdge: true, endOnEdge: true);
 
             // Decorate the maze
-            //maze.ShowIndexes();
-            maze.ShowStartAndEnd(path.start, path.end);
-            maze.ShowPath(path.path, path.start, path.end);
-            //maze.ShowDistanceHeatMap(path.distances);
+            grid.ShowStartAndEnd(path.start, path.end);
+            grid.ShowPath(path.path, path.start, path.end);
+            //grid.ShowDistances(path.distances);
+            //grid.ShowDistanceHeatMap(path.distances);
 
             // Draw and output the maze
-            await OutputMaze(options, imageSize, maze);
+            await OutputMaze(options, imageSize, grid);
         }
         catch (Exception ex)
         {
@@ -33,37 +33,37 @@ internal sealed class Program
         }
     }
 
-    private static Maze BuildMaze(MazeOptions options)
+    private static IGrid BuildMaze(MazeOptions options)
     {
-        Maze maze;
+        IGrid grid;
         if (options.MaskFilePath != null)
         {
             using var file = new FileStream(options.MaskFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var mask = Mask.LoadFrom(file).ScaleUp(2, 2);
 
-            maze = MazeBuilder
+            grid = MazeBuilder
                 .WithMask(mask)
                 .BuildRandomMaze();
         }
         else
         {
-            maze = MazeBuilder
+            grid = MazeBuilder
                 .WithSize((40, 40))
                 .BuildRandomMaze();
         }
 
-        return maze;
+        return grid;
     }
 
-    private static async Task OutputMaze(MazeOptions options, Dimensions imageSize, Maze maze)
+    private static async Task OutputMaze(MazeOptions options, Dimensions imageSize, IGrid grid)
     {
-        string filePath = FileUtils.GenerateFullPath(options.OutputFilePath!, maze);
+        string filePath = FileUtils.GenerateFullPath(options.OutputFilePath!, grid);
 
         MazeStyles styles = options.StylesFilePath != null
             ? await MazeStyles.Load(options.StylesFilePath)
             : new MazeStyles();
 
-        maze.RenderAsPng(filePath, imageSize, styles);
+        grid.RenderAsPng(filePath, imageSize, styles);
         //maze.RenderAsText(Console.Out);
 
         Console.WriteLine($"Complete @ {filePath}");

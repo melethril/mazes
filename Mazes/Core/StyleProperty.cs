@@ -1,10 +1,8 @@
-namespace Mazes.Core
+namespace Mazes.Core;
+
+public class StyleProperty(string name, object defaultValue)
 {
-    public class StyleProperty(string name, object defaultValue)
-    {
-        public string Name { get; } = name;
+    public string Name { get; } = name;
 
-        public object DefaultValue { get; } = defaultValue;
-    }
-
+    public object DefaultValue { get; } = defaultValue;
 }

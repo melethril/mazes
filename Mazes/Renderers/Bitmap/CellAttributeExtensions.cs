@@ -1,23 +1,23 @@
 using Mazes.Core;
 using SkiaSharp;
 
-namespace Mazes.Renderers.Bitmap
+namespace Mazes.Renderers.Bitmap;
+
+public static class CellAttributeExtensions
 {
-    public static class CellAttributeExtensions
-    {
-        public static SKColor GetBackgroundColour(this CellStyle style) => 
-            style.GetColour(StyleProperties.BackgroundColour);
+    public static SKColor GetBackgroundColour(this CellStyle style) => 
+        style.GetColour(StyleProperties.BackgroundColour);
 
-        public static SKColor GetForegroundColour(this CellStyle style) => 
-            style.GetColour(StyleProperties.ForegroundColour);
+    public static SKColor GetForegroundColour(this CellStyle style) => 
+        style.GetColour(StyleProperties.ForegroundColour);
             
-        public static SKColor GetOutlineColour(this CellStyle style) => 
-            style.GetColour(StyleProperties.OutlineColour);
+    public static SKColor GetOutlineColour(this CellStyle style) => 
+        style.GetColour(StyleProperties.OutlineColour);
 
-        private static readonly SKColor lastResortColor = SKColors.LightGray;
+    private static readonly SKColor lastResortColor = SKColors.LightGray;
 
-        public static SKColor GetColour(this CellStyle style, StyleProperty property)
-        {
+    public static SKColor GetColour(this CellStyle style, StyleProperty property)
+    {
             if (string.IsNullOrWhiteSpace(property.Name))
                 throw new ArgumentException("property has no name");
 
@@ -29,8 +29,8 @@ namespace Mazes.Renderers.Bitmap
             return ParseColour(value, defaultColour);
         }
 
-        public static SKColor ParseColour(object value, SKColor? defaultColour = null)
-        {
+    public static SKColor ParseColour(object value, SKColor? defaultColour = null)
+    {
             defaultColour ??= lastResortColor;
 
             if (value is not string hexValue || string.IsNullOrWhiteSpace(hexValue)) 
@@ -40,5 +40,4 @@ namespace Mazes.Renderers.Bitmap
 
         }
 
-    }
 }

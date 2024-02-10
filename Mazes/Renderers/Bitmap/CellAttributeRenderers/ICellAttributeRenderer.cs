@@ -1,8 +1,9 @@
-namespace Mazes.Renderers.Bitmap
+using Mazes.Renderers.Bitmap.RenderingContexts;
+
+namespace Mazes.Renderers.Bitmap.CellAttributeRenderers;
+
+public interface ICellAttributeRenderer
 {
-    public interface ICellAttributeRenderer
-    {
-        public int Order { get; }
-        public void Render(CellAttributeRenderingContext context);
-    }
+    public int Order { get; }
+    public void Render(CellAttributeRenderingContext context);
 }

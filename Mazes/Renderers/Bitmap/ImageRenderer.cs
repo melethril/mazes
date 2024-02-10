@@ -1,111 +1,105 @@
-namespace Mazes.Renderers.Bitmap
+using Mazes.Renderers.Bitmap.RenderingContexts;
+
+namespace Mazes.Renderers.Bitmap;
+
+using Core;
+using SkiaSharp;
+
+public class ImageRenderer(MazeStyles styles, RendererRegistry rendererRegistry)
 {
-    using Mazes.Core;
-    using SkiaSharp;
-
-    public class ImageRenderer(MazeStyles styles, RendererRegistry rendererRegistry)
+    public SKSurface Render(IGrid grid, Dimensions imageSize)
     {
-        private readonly MazeStyles styles = styles;
-        private readonly RendererRegistry rendererRegistry = rendererRegistry;
+        var pageBounds = CreatePageRect(imageSize, styles.Page.Margin);
+        int cellSize = CalculateCellSize(grid, pageBounds, styles.Page.NumPaddingCells);
+        var mazeBounds = CreateMazeRect(grid, pageBounds, cellSize);
 
-        public SKSurface Render(Maze maze, Dimensions imageSize)
-        {
-            var pageBounds = CreatePageRect(imageSize, styles.Page.Margin);
-            int cellSize = CalculateCellSize(maze, pageBounds, styles.Page.NumPaddingCells);
-            var mazeBounds = CreateMazeRect(maze, pageBounds, cellSize);
+        var surface = CreateSurface(imageSize);
+        var canvas = surface.Canvas;
 
-            var surface = CreateSurface(imageSize);
-            var canvas = surface.Canvas;
+        RenderPage(pageBounds, canvas, styles.Page.Margin);
+        RenderMaze(canvas, grid, mazeBounds, cellSize);
 
-            RenderPage(pageBounds, canvas, styles.Page.Margin);
-            RenderMaze(canvas, maze, mazeBounds, cellSize);
+        return surface;
+    }
 
-            return surface;
-        }
+    public void RenderPage(SKRectI pageBounds, SKCanvas canvas, int margin)
+    {
+        using SKPaint pageFill = new();
+        pageFill.IsStroke = false;
+        pageFill.Color = SKColor.Parse(styles.Page.BackgroundColour);
 
-        public void RenderPage(SKRectI pageBounds, SKCanvas canvas, int margin)
-        {
-            using SKPaint pageFill = new() 
-            { 
-                IsStroke = false,
-                Color = SKColor.Parse(styles.Page.BackgroundColour),
-            };
-
-            canvas.Clear(CellAttributeExtensions.ParseColour(styles.Image.BackgroundColour));
-            canvas.DrawRect(pageBounds, pageFill);
+        canvas.Clear(CellAttributeExtensions.ParseColour(styles.Image.BackgroundColour));
+        canvas.DrawRect(pageBounds, pageFill);
    
-            if (margin > 0)
-            {
-                using SKPaint pageOutline = new()
-                { 
-                    IsStroke = true,
-                    StrokeWidth = 2,
-                    Color = SKColor.Parse(styles.Page.OutlineColour)
-                };
-
-                canvas.DrawRect(pageBounds, pageOutline);
-            }
-        }
-
-        private void RenderMaze(SKCanvas canvas, Maze maze, SKRectI mazeBounds, int cellSize)
+        if (margin > 0)
         {
-            var cellsAndBounds = maze.AllCells
-                .Select(cell => (cell, bounds: GetBoundsForCell(mazeBounds, cellSize, cell)))
-                .ToArray();
+            using SKPaint pageOutline = new();
+            pageOutline.IsStroke = true;
+            pageOutline.StrokeWidth = 2;
+            pageOutline.Color = SKColor.Parse(styles.Page.OutlineColour);
 
-            CellRenderer cellRenderer = new(rendererRegistry);
-
-            foreach (var (cell, bounds) in cellsAndBounds)
-            {
-                cellRenderer.Render(new CellRenderingContext(styles, canvas, bounds, cell, contentBounds: null));
-            }
+            canvas.DrawRect(pageBounds, pageOutline);
         }
+    }
 
-        private static SKRectI GetBoundsForCell(SKRectI mazeBounds, int cellSize, ICell cell)
+    private void RenderMaze(SKCanvas canvas, IGrid grid, SKRectI mazeBounds, int cellSize)
+    {
+        var cellsAndBounds = grid.AllCells
+            .Select(cell => (cell, bounds: GetBoundsForCell(mazeBounds, cellSize, cell)))
+            .ToArray();
+
+        CellRenderer cellRenderer = new(rendererRegistry);
+
+        foreach (var (cell, bounds) in cellsAndBounds)
         {
-            return new(
-                left: mazeBounds.Left + (cell.ColumnIndex * cellSize),
-                top: mazeBounds.Top + (cell.RowIndex * cellSize),
-                right: mazeBounds.Left + ((cell.ColumnIndex + 1) * cellSize),
-                bottom: mazeBounds.Top + ((cell.RowIndex + 1) * cellSize)
-            );
+            cellRenderer.Render(new CellRenderingContext(styles, canvas, bounds, cell, contentBounds: null));
         }
+    }
 
-        private static SKSurface CreateSurface(Dimensions imageSize)
-        {
-            var imageInfo = new SKImageInfo(
-                width: imageSize.Width,
-                height: imageSize.Height,
-                colorType: SKColorType.Rgba8888,
-                alphaType: SKAlphaType.Premul
-            );
+    private static SKRectI GetBoundsForCell(SKRectI mazeBounds, int cellSize, ICell cell)
+    {
+        return new(
+            left: mazeBounds.Left + (cell.ColumnIndex * cellSize),
+            top: mazeBounds.Top + (cell.RowIndex * cellSize),
+            right: mazeBounds.Left + ((cell.ColumnIndex + 1) * cellSize),
+            bottom: mazeBounds.Top + ((cell.RowIndex + 1) * cellSize)
+        );
+    }
 
-            return SKSurface.Create(imageInfo);
-        }
+    private static SKSurface CreateSurface(Dimensions imageSize)
+    {
+        var imageInfo = new SKImageInfo(
+            width: imageSize.Width,
+            height: imageSize.Height,
+            colorType: SKColorType.Rgba8888,
+            alphaType: SKAlphaType.Premul
+        );
 
-        private static SKRectI CreatePageRect(Dimensions imageSize, int margin)
-        {
-            return new SKRectI(margin, margin, imageSize.Width - margin, imageSize.Height - margin);
-        }
+        return SKSurface.Create(imageInfo);
+    }
 
-        private static SKRectI CreateMazeRect(Maze maze, SKRectI page, int cellSize)
-        {
-            int mazeWidth = cellSize * maze.ColumnCount;
-            int mazeHeight = cellSize * maze.RowCount;
+    private static SKRectI CreatePageRect(Dimensions imageSize, int margin)
+    {
+        return new SKRectI(margin, margin, imageSize.Width - margin, imageSize.Height - margin);
+    }
 
-            int mazeLeft = page.Left + (page.Width / 2) - (mazeWidth / 2);
-            int mazeTop = page.Top + (page.Height / 2) - (mazeHeight / 2);
+    private static SKRectI CreateMazeRect(IGrid grid, SKRectI page, int cellSize)
+    {
+        int mazeWidth = cellSize * grid.ColumnCount;
+        int mazeHeight = cellSize * grid.RowCount;
 
-            return new SKRectI(mazeLeft, mazeTop, mazeLeft + mazeWidth, mazeTop + mazeHeight);
-        }
+        int mazeLeft = page.Left + (page.Width / 2) - (mazeWidth / 2);
+        int mazeTop = page.Top + (page.Height / 2) - (mazeHeight / 2);
 
-        private static int CalculateCellSize(Maze maze, SKRectI page, int numPaddingCells)
-        {
-            int cellWidth = page.Width / (maze.ColumnCount + (numPaddingCells * 2));
-            int cellHeight = page.Height / (maze.RowCount + (numPaddingCells * 2));
-            int cellSize = Math.Min(cellHeight, cellWidth);
+        return new SKRectI(mazeLeft, mazeTop, mazeLeft + mazeWidth, mazeTop + mazeHeight);
+    }
 
-            return cellSize;
-        }
+    private static int CalculateCellSize(IGrid grid, SKRectI page, int numPaddingCells)
+    {
+        int cellWidth = page.Width / (grid.ColumnCount + (numPaddingCells * 2));
+        int cellHeight = page.Height / (grid.RowCount + (numPaddingCells * 2));
+        int cellSize = Math.Min(cellHeight, cellWidth);
+
+        return cellSize;
     }
 }

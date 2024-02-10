@@ -1,27 +1,28 @@
-namespace Mazes
+using Mazes.Core;
+
+namespace Mazes.Algorithms;
+
+public class BinaryTreeAlgorithm : IMazeAlgorithm
 {
-    public class BinaryTreeAlgorithm : IMazeAlgorithm
+    public string Name => "Binary Tree";
+
+    public Grid Apply(Grid grid, Random random)
     {
-        public string Name => "Binary Tree";
-
-        public Maze Apply(Maze maze, Random random)
+        foreach (var cell in grid.PathableCells)
         {
-            foreach (var cell in maze.PathableCells)
+            var neighbours = new[] { cell.East, cell.North }
+                .Where(c => c is not null)
+                .Cast<ICell>()
+                .ToArray();
+
+            if (neighbours.Any())
             {
-                ICell[] neighbours = new[] { cell.East, cell.North }
-                    .Where(cell => cell is not null)
-                    .Cast<Cell>()
-                    .ToArray();
+                var neighbour = neighbours[random.Next(neighbours.Length)];
 
-                if (neighbours.Any())
-                {
-                    var neighbour = neighbours[random.Next(neighbours.Length)];
-
-                    cell.Link(neighbour);
-                }
+                cell.Link(neighbour);
             }
-
-            return maze;
         }
+
+        return grid;
     }
 }

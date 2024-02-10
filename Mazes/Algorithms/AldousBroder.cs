@@ -1,29 +1,31 @@
-namespace Mazes
+using Mazes.Core;
+using Mazes.Utils;
+
+namespace Mazes.Algorithms;
+
+public class AldousBroderAlgorithm : IMazeAlgorithm
 {
-    public class AldousBroderAlgorithm : IMazeAlgorithm
+    public string Name => "Aldous-Broder";
+
+    public Grid Apply(Grid grid, Random random)
     {
-        public string Name => "Aldous-Broder";
+        var cell = grid.GetRandomCell(random);
+        int unvisited = grid.Size - 1;
 
-        public Maze Apply(Maze maze, Random random)
+        while (unvisited > 0)
         {
-            ICell cell = maze.GetRandomCell(random)!;
-            var unvisited = maze.Size - 1;
+            ICell[] neighbours = cell.Neighbours.ToArray();
+            ICell neighbour = random.Sample(neighbours)!;
 
-            while (unvisited > 0)
+            if (neighbour.Links.Any() == false)
             {
-                ICell[] neighbours = cell.Neighbours.ToArray();
-                ICell neighbour = random.Sample(neighbours)!;
-
-                if (neighbour.Links.Any() == false)
-                {
-                    cell.Link(neighbour);
-                    unvisited -= 1;
-                }
-
-                cell = neighbour;
+                cell.Link(neighbour);
+                unvisited -= 1;
             }
 
-            return maze;
+            cell = neighbour;
         }
+
+        return grid;
     }
 }

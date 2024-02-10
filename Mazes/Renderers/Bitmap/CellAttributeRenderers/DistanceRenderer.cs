@@ -1,17 +1,18 @@
-namespace Mazes.Renderers.Bitmap
+using Mazes.Renderers.Bitmap.RenderingContexts;
+
+namespace Mazes.Renderers.Bitmap.CellAttributeRenderers;
+
+internal class DistanceRenderer : ICellAttributeRenderer
 {
-    internal class DistanceRenderer : ICellAttributeRenderer
+    public int Order => 0;
+
+    public void Render(CellAttributeRenderingContext context)
     {
-        public int Order => 0;
+        string? text = context.Attribute.GetValueAs<string>();
+        if (text == null) return;
 
-        public void Render(CellAttributeRenderingContext context)
-        {
-            string? text = context.Attribute?.GetValueAs<string>();
-            if (text == null) return;
+        var fgColour = context.Style.GetForegroundColour();
 
-            var fgColour = context.Style.GetForegroundColour();
-
-            context.RenderText(text, fgColour);
-        }
+        context.RenderText(text, fgColour);
     }
 }

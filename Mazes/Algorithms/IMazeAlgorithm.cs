@@ -1,8 +1,9 @@
-namespace Mazes
+using Mazes.Core;
+
+namespace Mazes.Algorithms;
+
+public interface IMazeAlgorithm
 {
-    public interface IMazeAlgorithm
-    {
-        string Name { get; }
-        Maze Apply(Maze maze, Random random);
-    }
+    string Name { get; }
+    Grid Apply(Grid grid, Random random);
 }

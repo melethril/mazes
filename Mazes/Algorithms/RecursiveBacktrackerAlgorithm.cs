@@ -1,33 +1,35 @@
-namespace Mazes
+using Mazes.Core;
+using Mazes.Utils;
+
+namespace Mazes.Algorithms;
+
+public class RecursiveBacktrackerAlgorithm : IMazeAlgorithm
 {
-    public class RecursiveBacktrackerAlgorithm : IMazeAlgorithm
+    public string Name => "Recursive Backtracker";
+
+    public Grid Apply(Grid grid, Random random)
     {
-        public string Name => "Recursive Backtracker";
+        var startAt = grid.GetRandomCell(random);
+        var stack = new Stack<ICell>();
+        stack.Push(startAt);
 
-        public Maze Apply(Maze maze, Random random)
+        while (stack.Any())
         {
-            var startAt = maze.GetRandomCell(random)!;
-            var stack = new Stack<ICell>();
-            stack.Push(startAt);
-
-            while (stack.Any())
-            {
-                var current = stack.Peek();
-                var neighbours = current.Neighbours.Where(c => !c.Links.Any()).ToArray();
+            var current = stack.Peek();
+            var neighbours = current.Neighbours.Where(c => !c.Links.Any()).ToArray();
                 
-                if (!neighbours.Any())
-                {
-                    stack.Pop();
-                }
-                else
-                {
-                    var neighbour = random.Sample(neighbours)!;
-                    current.Link(neighbour);
-                    stack.Push(neighbour);
-                }
+            if (!neighbours.Any())
+            {
+                stack.Pop();
             }
-
-            return maze;
+            else
+            {
+                var neighbour = random.Sample(neighbours)!;
+                current.Link(neighbour);
+                stack.Push(neighbour);
+            }
         }
+
+        return grid;
     }
 }

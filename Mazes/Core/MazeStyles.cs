@@ -1,38 +1,36 @@
 using System.Text.Json;
 
-namespace Mazes.Core
+namespace Mazes.Core;
+
+public class MazeStyles
 {
-    public class MazeStyles
+    public ImageStyles Image { get; init; } = new();
+    public PageStyles Page { get; init; } = new();
+    public CellStyles Cells { get; init; } = new();
+
+    private static readonly JsonSerializerOptions jsonOptions = new()
     {
-        public ImageStyles Image { get; set; } = new();
-        public PageStyles Page { get; set; } = new();
-        public CellStyles Cells { get; set; } = new();
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
 
-        private static readonly JsonSerializerOptions jsonOptions = new()
+    public static async Task<MazeStyles> Load(string path)
+    {
+        await using var stream = File.Exists(path) ? File.OpenRead(path) : null;
+        MazeStyles? styles = null;
+
+        if (stream != null)
         {
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        };
-
-        public static async Task<MazeStyles> Load(string path)
-        {
-            using FileStream? stream = File.Exists(path) ? File.OpenRead(path) : null;
-            MazeStyles? styles = null;
-
-            if (stream != null)
-            {
-                styles = await JsonSerializer.DeserializeAsync<MazeStyles>(stream, jsonOptions);
-            }
-
-            return styles ?? throw new FileLoadException("Unable to load styles");
+            styles = await JsonSerializer.DeserializeAsync<MazeStyles>(stream, jsonOptions);
         }
 
-        public async Task Save(string path)
-        {
-            await using FileStream stream = File.Create(path);
-            await JsonSerializer.SerializeAsync(stream, this, jsonOptions);
-        }
+        return styles ?? throw new FileLoadException("Unable to load styles");
     }
 
+    public async Task Save(string path)
+    {
+        await using FileStream stream = File.Create(path);
+        await JsonSerializer.SerializeAsync(stream, this, jsonOptions);
+    }
 }
