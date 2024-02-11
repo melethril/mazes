@@ -1,21 +1,12 @@
 namespace Mazes.Core;
 
-public class Cell : ICell
+public abstract class Cell : ICell
 {
     public int RowIndex { get; }
     public int ColumnIndex { get; }
     public bool IsPathable { get; }
 
-    public ICell? North { get; set; }
-    public ICell? South { get; set; }
-    public ICell? East { get; set; }
-    public ICell? West { get; set; }
-
-    public bool HasNorthEdge => North == null;
-    public bool HasWestEdge => West == null;
-    public bool HasEastEdge => East == null;
-    public bool HasSouthEdge => South == null;
-    public bool IsOnEdge => new[] { North, East, South, West }.Any(d => d == null);
+    public abstract bool IsOnEdge { get; }
     public bool IsOnOuterEdge { get; set; }
     public bool IsDeadEnd => links.Count == 1;
     public bool IsVoid  => Attributes.Any(a => a.Type == CellAttributeType.IsVoid);
@@ -23,7 +14,7 @@ public class Cell : ICell
 
     private readonly Dictionary<ICell, bool> links = [];
 
-    public Cell(int row, int column, bool isPathable = true, IList<CellAttribute>? attributes = null)
+    protected Cell(int row, int column, bool isPathable = true, IList<CellAttribute>? attributes = null)
     {
         RowIndex = row;
         ColumnIndex = column;
@@ -57,13 +48,5 @@ public class Cell : ICell
         return this;
     }
 
-    public IEnumerable<ICell> Neighbours
-    {
-        get
-        {
-            return new[] { North, South, East, West }
-                .Where(o => o is not null)
-                .Cast<ICell>();
-        }
-    }
+    public abstract IEnumerable<ICell> Neighbours { get; }
 }

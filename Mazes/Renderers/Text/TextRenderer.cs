@@ -5,19 +5,19 @@ namespace Mazes.Renderers.Text;
 
 public class TextRenderer
 {
-    public void Render(Grid grid, TextWriter writer)
+    public void Render(RectangularGrid grid, TextWriter writer)
     {
         const int cellWidth = 4;
         string horizontalWall = new('-', cellWidth);
         string verticalLink = new(' ', cellWidth);
         string output = "+" + string.Join("", Enumerable.Repeat(horizontalWall + "+", grid.ColumnCount)) + "\n";
 
-        foreach (var row in grid.EachRow())
+        foreach (var row in grid.AllRows)
         {
             string bodyLine = "|";
             string bottomLine = "+";
 
-            foreach (var cell in row)
+            foreach (var cell in row.Cast<RectangularCell>())
             {
                 string label = GetCellLabel(cell);
 

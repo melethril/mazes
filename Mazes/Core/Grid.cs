@@ -1,102 +1,55 @@
 namespace Mazes.Core;
 
-public abstract class Grid : IGrid
+public abstract class Grid(int rowCount, int columnCount, IReadOnlyList<ICell[]> grid) : IGrid
 {
-    public int RowCount { get; }
-    public int ColumnCount { get; }
-    public virtual int Size => RowCount * ColumnCount;
+    public int RowCount { get; } = rowCount;
 
-    protected readonly ICell[][] grid;
+    public int ColumnCount => columnCount;
 
-    protected Grid(int rows, int columns, ICell[][] grid)
+    public int CellCount => AllCells.Count();
+
+    protected bool IsInBounds(int row, int column)
     {
-        RowCount = rows;
-        ColumnCount = columns;
-        this.grid = grid;
-
-        ConfigureCells();
+        return IsRowInBounds(row) && IsColumnInBounds(GetRow(row), column);
+    }
+    
+    private bool IsRowInBounds(int row)
+    {
+        return row >= 0 && row < RowCount;
     }
 
-    protected void ConfigureCells()
+    private static bool IsColumnInBounds(IReadOnlyCollection<ICell> row, int column)
     {
-        foreach (var cell in this.AllCells)
-        {
-            var (rowIndex, colIndex) = (cell.RowIndex, cell.ColumnIndex);
-
-            if (rowIndex == 0 || colIndex == 0 || rowIndex == RowCount - 1 || colIndex == ColumnCount - 1)
-                cell.IsOnOuterEdge = true;
-
-            TryGetCellAt(rowIndex - 1, colIndex, out var north);
-            TryGetCellAt(rowIndex + 1, colIndex, out var south);
-            TryGetCellAt(rowIndex, colIndex + 1, out var east);
-            TryGetCellAt(rowIndex, colIndex - 1, out var west);
-
-            if (cell.IsPathable)
-                SetupPathableCell(cell, north, south, east, west);
-            else
-                SetupNonPathableCell(cell, north, south, east, west);
-
-        }
+        return column >= 0 && column < row.Count;
     }
 
-    private static void SetupPathableCell(ICell cell, ICell? north, ICell? south, ICell? east, ICell? west)
+    protected ICell GetCell(int row, int column)
     {
-        cell.North = north?.IsPathable == true ? north : null;
-        cell.South = south?.IsPathable == true ? south : null;
-        cell.East = east?.IsPathable == true ? east : null;
-        cell.West = west?.IsPathable == true ? west : null;
+        if (!IsInBounds(row, column))
+            throw new IndexOutOfRangeException($"Cell index out of bounds: ({row}, {column})");
+
+        return grid[row][column];
     }
 
-    private static void SetupNonPathableCell(ICell cell, ICell? north, ICell? south, ICell? east, ICell? west)
+    public ICell[] GetRow(int row)
     {
-        cell.North = north;
-        cell.South = south;
-        cell.East = east;
-        cell.West = west;
-        const bool bidirectional = false;
+        if (!IsRowInBounds(row))
+            throw new IndexOutOfRangeException($"Row index out of bounds: {row}");
 
-        if (cell.North?.IsPathable == false)
-            cell.Link(cell.North, bidirectional);
-        if (cell.South?.IsPathable == false)
-            cell.Link(cell.South, bidirectional);
-        if (cell.East?.IsPathable == false)
-            cell.Link(cell.East, bidirectional);
-        if (cell.West?.IsPathable == false)
-            cell.Link(cell.West, bidirectional);
+        return grid[row];
     }
 
-    private bool IsInBounds(int row, int column)
+    public virtual ICell GetRandomCell(Random random)
     {
-        if (row < 0 || row >= RowCount) return false;
-        if (column < 0 || column >= ColumnCount) return false;
+        int row = random.Next(RowCount);
+        int col = random.Next(grid[row].Length);
 
-        return true;
+        return GetCell(row, col);
     }
 
-    // ReSharper disable once UnusedMethodReturnValue.Local
-    private bool TryGetCellAt(int row, int column, out ICell? cell)
+    public IEnumerable<ICell[]> AllRows
     {
-        cell = IsInBounds(row, column) ? this[row, column] : null;
-
-        return cell != null;
-    }
-
-    public ICell this[int row, int column]
-    {
-        get
-        {
-            if (!IsInBounds(row, column))
-                throw new IndexOutOfRangeException($"Cell index out of bounds: ({row}, {column})");
-
-            return grid[row][column];
-        }
-    }
-
-    public abstract ICell GetRandomCell(Random random);
-
-    public IEnumerable<ICell[]> EachRow()
-    {
-        return grid.Select(r => r);
+        get { return grid.Select(r => r); }
     }
 
     public IEnumerable<ICell> PathableCells

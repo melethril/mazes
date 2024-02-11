@@ -7,7 +7,7 @@ public class HuntAndKill : IMazeAlgorithm
 {
     public string Name => "Hunt-and-Kill";
 
-    public Grid Apply(Grid grid, Random random)
+    public IGrid Apply(IGrid grid, Random random)
     {
         var current = grid.GetRandomCell(random);
 

@@ -7,10 +7,10 @@ public class AldousBroderAlgorithm : IMazeAlgorithm
 {
     public string Name => "Aldous-Broder";
 
-    public Grid Apply(Grid grid, Random random)
+    public IGrid Apply(IGrid grid, Random random)
     {
         var cell = grid.GetRandomCell(random);
-        int unvisited = grid.Size - 1;
+        int unvisited = grid.CellCount - 1;
 
         while (unvisited > 0)
         {

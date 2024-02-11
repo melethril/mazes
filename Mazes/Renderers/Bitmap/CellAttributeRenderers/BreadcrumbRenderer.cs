@@ -10,7 +10,7 @@ internal class BreadcrumbRenderer : ICellAttributeRenderer
 
     public void Render(CellAttributeRenderingContext context)
     {
-        SKRectI bounds = context.Bounds;
+        var bounds = context.Bounds;
         int pillSize = Math.Max(bounds.Width / 6, MinPillSize);
         int centreX = bounds.Left + (bounds.Width / 2);
         int centreY = bounds.Top + (bounds.Height / 2);

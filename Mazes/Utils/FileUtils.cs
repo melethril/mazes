@@ -12,7 +12,7 @@ public static class FileUtils
 
     public static string GenerateFilename(IGrid grid, IMazeAlgorithm? algorithm = null, bool withTimestamp = false)
     {
-        string dims = $"_{grid.RowCount}x{grid.ColumnCount}";
+        string dims = $"_{grid.RowCount}" + (grid is RectangularGrid rect ? $"x{rect.ColumnCount}": "_polar");
         string algName = algorithm != null ? $"_{algorithm.Name.ToLower().Replace(" ", "_")}" : string.Empty;
         string timestamp = withTimestamp ? $"_{DateTime.UtcNow:yyyyMMdd-HHmmss}.png" : string.Empty;
 

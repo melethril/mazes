@@ -6,7 +6,7 @@ namespace Mazes.Utils;
 
 public static class MazeExtensions
 {
-    public static void RenderAsText(this Grid grid, TextWriter writer)
+    public static void RenderAsText(this RectangularGrid grid, TextWriter writer)
     {
         var renderer = new TextRenderer();
         renderer.Render(grid, writer);

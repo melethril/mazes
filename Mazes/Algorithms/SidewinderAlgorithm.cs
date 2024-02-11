@@ -7,13 +7,15 @@ public class SidewinderAlgorithm : IMazeAlgorithm
 {
     public string Name => "Sidewinder";
 
-    public Grid Apply(Grid grid, Random random)
+    public IGrid Apply(IGrid grid, Random random)
     {
-        foreach (var row in grid.EachRow())
+        var rectGrid = grid as RectangularGrid ?? throw new ArgumentException($"{Name} algorithmn can only be applied to rectangular grids");
+        
+        foreach (var row in rectGrid.AllRows)
         {
             var run = new List<ICell>();
 
-            foreach (var cell in row.Where(c => c.IsPathable))
+            foreach (var cell in row.Where(c => c.IsPathable).Cast<RectangularCell>())
             {
                 run.Add(cell);
                     
@@ -23,7 +25,7 @@ public class SidewinderAlgorithm : IMazeAlgorithm
 
                 if (shouldEndRun)
                 {
-                    ICell? member = random.Sample(run);
+                    var member = random.Sample(run) as RectangularCell;
                     if (member?.North is not null) 
                         member.Link(member.North);
 

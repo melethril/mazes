@@ -13,7 +13,8 @@ internal static class Program
             var imageSize = Dimensions.Screen1280x1024;
 
             // Generate a maze
-            IGrid grid = BuildMaze(options);
+            var descriptor = GetMazeDescriptor(options);
+            var grid = MazeBuilder.Build(descriptor);
 
             // Calculate the longest path through the maze
             var path = grid.CalculateLongestPath(startOnEdge: true, endOnEdge: true);
@@ -33,33 +34,25 @@ internal static class Program
         }
     }
 
-    private static IGrid BuildMaze(MazeOptions options)
+    private static MazeDescriptor GetMazeDescriptor(MazeOptions options)
     {
-        IGrid grid;
+        Mask? mask = null;
         if (options.MaskFilePath != null)
         {
             using var file = new FileStream(options.MaskFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var mask = Mask.LoadFrom(file).ScaleUp(2, 2);
-
-            grid = MazeBuilder
-                .WithMask(mask)
-                .BuildRandomMaze();
-        }
-        else
-        {
-            grid = MazeBuilder
-                .WithSize((40, 40))
-                .BuildRandomMaze();
+            mask = Mask.LoadFrom(file).ScaleUp(2, 2);
         }
 
-        return grid;
+        var topology = options.Polar ? MazeTopology.Polar : MazeTopology.Rectangular;
+
+        return MazeDescriptor.Random(topology, (options.Rows, options.Columns), mask);
     }
 
     private static async Task OutputMaze(MazeOptions options, Dimensions imageSize, IGrid grid)
     {
         string filePath = FileUtils.GenerateFullPath(options.OutputFilePath!, grid);
 
-        MazeStyles styles = options.StylesFilePath != null
+        var styles = options.StylesFilePath != null
             ? await MazeStyles.Load(options.StylesFilePath)
             : new MazeStyles();
 

@@ -2,6 +2,7 @@ using CommandLine;
 
 namespace MazeTool;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 internal class MazeOptions
 {
     [Option("outdir", Required = true, HelpText = "Output path.")]
@@ -12,6 +13,15 @@ internal class MazeOptions
 
     [Option("stylesfile", Required = false, HelpText = "Styles file path.")]
     public string? StylesFilePath { get; set; }
+    
+    [Option("polar", Required = false, HelpText = "Use a polar grid.", Default = false)]
+    public bool Polar { get; set; }
+    
+    [Option("rows", Required = false, HelpText = "Number of rows.", Default = 40)]
+    public int Rows { get; set; }
+    
+    [Option("cols", Required = false, HelpText = "Number of columns.", Default = 40)]
+    public int Columns { get; set; }
 
     internal static MazeOptions Parse(string[] args)
     {

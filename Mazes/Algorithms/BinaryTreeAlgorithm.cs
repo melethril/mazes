@@ -6,9 +6,11 @@ public class BinaryTreeAlgorithm : IMazeAlgorithm
 {
     public string Name => "Binary Tree";
 
-    public Grid Apply(Grid grid, Random random)
+    public IGrid Apply(IGrid grid, Random random)
     {
-        foreach (var cell in grid.PathableCells)
+        var rectGrid = grid as RectangularGrid ?? throw new ArgumentException($"{Name} algorithmn can only be applied to rectangular grids");
+        
+        foreach (var cell in rectGrid.PathableCells.Cast<RectangularCell>())
         {
             var neighbours = new[] { cell.East, cell.North }
                 .Where(c => c is not null)

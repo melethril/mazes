@@ -7,7 +7,7 @@ public class RecursiveBacktrackerAlgorithm : IMazeAlgorithm
 {
     public string Name => "Recursive Backtracker";
 
-    public Grid Apply(Grid grid, Random random)
+    public IGrid Apply(IGrid grid, Random random)
     {
         var startAt = grid.GetRandomCell(random);
         var stack = new Stack<ICell>();

@@ -1,6 +1,6 @@
 namespace Mazes.Core;
 
-public class MaskedGrid : Grid
+public class MaskedGrid : RectangularGrid
 {
     private readonly Mask mask;
 
@@ -23,8 +23,8 @@ public class MaskedGrid : Grid
 
             for (int j = 0; j < numColumns; j++)
             {
-                var isPathable = mask[i, j];
-                row[j] = new Cell(i, j, isPathable, isPathable ? null : voidAttribute);
+                bool isPathable = mask[i, j];
+                row[j] = new RectangularCell(i, j, isPathable, isPathable ? null : voidAttribute);
             }
 
             rows[i] = row;
@@ -37,8 +37,7 @@ public class MaskedGrid : Grid
     {
         (int row, int col) = mask.GetRandomLocation(random);
 
-        return this[row, col];
+        return GetCell(row, col);
     }
 
-    public override int Size => mask.Count();
 }

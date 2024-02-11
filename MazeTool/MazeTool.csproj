@@ -14,5 +14,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Mazes\Mazes.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="..\styles.json">
+      <Link>styles.json</Link>
+    </Content>
+  </ItemGroup>
 
 </Project>

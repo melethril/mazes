@@ -39,4 +39,19 @@ public class RendererRegistry
         return renderer.Value;
     }
 
+    public IEnumerable<(CellAttribute attr, ICellAttributeRenderer renderer)> GetRenderers(IEnumerable<CellAttribute> cellAttributes)
+    {
+        CellAttribute defaultCellAttribute = new(CellAttributeType.Default);
+
+        var attributes = new [] { defaultCellAttribute }
+            .Concat(cellAttributes);
+
+        var cellRenderers = attributes
+            .Where(attr => HasRenderer(attr.Type))
+            .Select(attr => (attr, renderer: GetRenderer(attr.Type)))
+            .OrderBy(o => o.renderer.Order);
+
+        return cellRenderers;
+    }
+
 }

@@ -3,8 +3,8 @@
     "backgroundColour": "#FFFFFF"
   },
   "page": {
-    "margin": 0,
-    "numPaddingCells": 2,
+    "margin": 5,
+    "numPaddingCells": 1,
     "wallWidth": 2,
     "wallColour": "#756958",
     "backgroundColour": "#c7bcab"

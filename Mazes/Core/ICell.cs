@@ -4,15 +4,7 @@ public interface ICell
 {
     int RowIndex { get; }
     int ColumnIndex { get; }
-    ICell? North { get; set; }
-    ICell? South { get; set; }
-    ICell? East { get; set; }
-    ICell? West { get; set; }
 
-    bool HasNorthEdge { get; }
-    bool HasWestEdge { get; }
-    bool HasEastEdge { get; }
-    bool HasSouthEdge { get; }
     bool IsOnEdge { get; }
     bool IsOnOuterEdge { get; set; }
     bool IsDeadEnd { get; }
