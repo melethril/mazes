@@ -1,5 +1,8 @@
+using System.Diagnostics;
+
 namespace Mazes.Core;
 
+[DebuggerDisplay("({RowIndex},{ColumnIndex})")]
 public abstract class Cell : ICell
 {
     public int RowIndex { get; }

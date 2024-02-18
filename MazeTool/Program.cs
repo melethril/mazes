@@ -1,4 +1,5 @@
-﻿using Mazes.Core;
+﻿using Mazes.Algorithms;
+using Mazes.Core;
 using Mazes.Utils;
 
 namespace MazeTool;
@@ -10,7 +11,7 @@ internal static class Program
         try
         {
             var options = MazeOptions.Parse(args);
-            var imageSize = Dimensions.Screen1280x1024;
+            var imageSize = Dimensions.Screen1280X1024;
 
             // Generate a maze
             var descriptor = GetMazeDescriptor(options);
@@ -45,7 +46,10 @@ internal static class Program
 
         var topology = options.Polar ? MazeTopology.Polar : MazeTopology.Rectangular;
 
-        return MazeDescriptor.Random(topology, (options.Rows, options.Columns), mask);
+        return MazeDescriptor.Specific(
+            new RecursiveBacktrackerAlgorithm(),
+            topology, (options.Rows, options.Columns), 1234, mask
+        );
     }
 
     private static async Task OutputMaze(MazeOptions options, Dimensions imageSize, IGrid grid)
