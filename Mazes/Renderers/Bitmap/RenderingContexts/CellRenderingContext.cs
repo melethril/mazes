@@ -4,17 +4,17 @@ using SkiaSharp;
 
 namespace Mazes.Renderers.Bitmap.RenderingContexts;
 
-public sealed class CellRenderingContext<T>(MazeStyles styles, SKCanvas canvas, SKRectI cellBounds, T cell, SKRectI? contentBounds) where T : ICell
+public sealed class CellRenderingContext<TCell>(MazeStyles styles, SKCanvas canvas, SKRectI cellBounds, TCell cell, SKRectI? contentBounds) where TCell : ICell
 {
     public MazeStyles Styles { get; } = styles;
     public SKCanvas Canvas { get; } = canvas;
     public SKRectI CellBounds { get; } = cellBounds;
     public SKRectI ContentBounds { get; } = contentBounds ?? cellBounds;
-    public T Cell { get; } = cell;
+    public TCell Cell { get; } = cell;
 
-    public CellRenderingContext<T> WithContentBounds(SKRectI contentBounds)
+    public CellRenderingContext<TCell> WithContentBounds(SKRectI contentBounds)
     {
-        return new CellRenderingContext<T>(Styles, Canvas, CellBounds, Cell, contentBounds);
+        return new CellRenderingContext<TCell>(Styles, Canvas, CellBounds, Cell, contentBounds);
     }
 
     public CellAttributeRenderingContext ForAttribute(CellAttribute attribute, ICellAttributeRenderer renderer)

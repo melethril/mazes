@@ -21,14 +21,14 @@ public class PolarGrid : Grid
             double circumference = 2 * Math.PI * radius;
             int previousCount = rows[rowNum - 1].Length;
             double estimatedCellWidth = circumference / previousCount;
-            int ratio = (int)Math.Round(estimatedCellWidth / rowHeight, 0);
+            int ratio = (int)Math.Round(estimatedCellWidth / rowHeight);
             int numCells = previousCount * ratio;
 
             var row = new PolarCell[numCells]; 
-            for (int colNum = 0; colNum < numCells; colNum++)
+            for (int colIndex = 0; colIndex < numCells; colIndex++)
             {
                 bool isPathable = true;
-                row[colNum] = new PolarCell(rowNum, colNum, isPathable, isPathable ? null : voidAttribute);
+                row[colIndex] = new PolarCell(rowNum, colIndex, isPathable, isPathable ? null : voidAttribute);
             }
 
             rows[rowNum] = row;
@@ -46,11 +46,11 @@ public class PolarGrid : Grid
 
             if (rowIndex > 0)
             {
-                cell.Clockwise = IsInBounds(rowIndex, colIndex + 1) ? GetCell(rowIndex, colIndex + 1) : null;
-                cell.AntiClockwise = IsInBounds(rowIndex, colIndex - 1) ? GetCell(rowIndex, colIndex - 1) : null;
-
                 int ratio = GetRow(rowIndex).Length / GetRow(rowIndex - 1).Length;
                 var parent = (PolarCell)GetCell(rowIndex - 1, colIndex / ratio);
+
+                cell.Clockwise = IsInBounds(rowIndex, colIndex + 1) ? GetCell(rowIndex, colIndex + 1) : null;
+                cell.AntiClockwise = IsInBounds(rowIndex, colIndex - 1) ? GetCell(rowIndex, colIndex - 1) : null;
                 parent.Outward.Add(cell);
                 cell.Inward = parent;
             }

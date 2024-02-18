@@ -36,21 +36,6 @@ internal class MazeOptions
             throw new ArgumentException("Invalid Arguments");
         }
 
-        if (string.IsNullOrWhiteSpace(parserResult.Value.OutputFilePath))
-        {
-            Console.WriteLine($"Output folder: {parserResult.Value.OutputFilePath}");
-        }
-
-        if (string.IsNullOrWhiteSpace(parserResult.Value.StylesFilePath))
-        {
-            Console.WriteLine($"Styles file: {parserResult.Value.StylesFilePath}");
-        }
-
-        if (string.IsNullOrWhiteSpace(parserResult.Value.MaskFilePath))
-        {
-            Console.WriteLine($"Mask file: {parserResult.Value.MaskFilePath}");
-        }
-
         return parserResult.Value;
     }
 }

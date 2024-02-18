@@ -14,7 +14,8 @@ internal class PolarGridRenderer(MazeStyles styles, RendererRegistry rendererReg
             y: pageBounds.Top + (pageBounds.Height / 2)
         );
 
-        int cellSize = Math.Min(pageBounds.Width, pageBounds.Height) / ((grid.RowCount * 2) + (styles.Page.NumPaddingCells * 2));
+        int cellSize = Math.Min(pageBounds.Width, pageBounds.Height) /
+                       ((grid.RowCount * 2) + (styles.Page.NumPaddingCells * 2));
 
         using SKPaint wallBrush = new();
         wallBrush.IsStroke = true;
@@ -22,14 +23,23 @@ internal class PolarGridRenderer(MazeStyles styles, RendererRegistry rendererReg
         wallBrush.StrokeWidth = styles.Page.WallWidth;
         wallBrush.IsAntialias = true;
 
-        canvas.DrawCircle(centre.X, centre.Y, grid.RowCount * cellSize, wallBrush);
-        
+        canvas.DrawCircle(centre.X, centre.Y, (grid.RowCount) * cellSize, wallBrush);
+
         foreach (var cell in grid.AllCells.Cast<PolarCell>())
         {
-            if (cell.RowIndex == 0) continue;
-            
-            var walls = BuildCellWalls(grid, centre, cell, cellSize);
+            double theta = 2 * Math.PI / grid.GetRow(cell.RowIndex).Length;
+            double thetaAntiClockwise = (cell.ColumnIndex) * theta;
+            double thetaClockwise = (cell.ColumnIndex + 1) * theta;
 
+            int innerRadius = (cell.RowIndex) * cellSize;
+            int outerRadius = (cell.RowIndex + 1) * cellSize;
+
+            var a = GetPoint(centre, innerRadius, thetaAntiClockwise);
+            var b = GetPoint(centre, outerRadius, thetaAntiClockwise);
+            var c = GetPoint(centre, innerRadius, thetaClockwise);
+            var d = GetPoint(centre, outerRadius, thetaClockwise);
+
+            var walls = BuildCellWalls(cell, a, b, c, d, innerRadius, outerRadius);
             canvas.DrawPath(walls, wallBrush);
             
             // Define a smaller inner rectangle to account for wall widths
@@ -52,32 +62,23 @@ internal class PolarGridRenderer(MazeStyles styles, RendererRegistry rendererReg
             //     renderer.Render(attrContext);
             // }
         }
-        
     }
 
-    private static SKPath BuildCellWalls(Grid grid, SKPointI centre, PolarCell cell, int cellSize)
+    private static SKPath BuildCellWalls(
+        PolarCell cell, SKPointI a, SKPointI b, SKPointI c, SKPointI d,
+        int innerRadius, int outerRadius)
     {
-        int innerRadius = cell.RowIndex * cellSize;
-        int outerRadius = (cell.RowIndex + 1) * cellSize;
-            
-        double theta = 2 * Math.PI / grid.GetRow(cell.RowIndex).Length;
-        double thetaClockwise = cell.ColumnIndex * theta;
-        double thetaAntiClockwise = (cell.ColumnIndex + 1) * theta;
-
-        var a = GetPoint(centre, innerRadius, thetaAntiClockwise);
-        var b = GetPoint(centre, outerRadius, thetaAntiClockwise);
-        var c = GetPoint(centre, innerRadius, thetaClockwise);
-        var d = GetPoint(centre, outerRadius, thetaClockwise);
-        
         SKPath walls = new();
 
-        if (cell.IsOnOuterEdge && !cell.IsVoid)
+        if ((cell.HasOutwardEdge || !cell.Outward.Any(cell.IsLinked)) && !cell.IsVoid)
         {
             walls.MoveTo(b);
-            walls.ArcTo(new SKPoint(outerRadius, outerRadius), 0, SKPathArcSize.Small, SKPathDirection.CounterClockwise, d);
+            walls.ArcTo(new SKPoint(outerRadius, outerRadius),
+                0, SKPathArcSize.Small, SKPathDirection.Clockwise, d
+            );
         }
 
-        if (cell.HasAntiClockwiseEdge && !cell.IsVoid)
+        if ((cell.HasAntiClockwiseEdge || !cell.IsLinked(cell.AntiClockwise)) && !cell.IsVoid)
         {
             walls.MoveTo(a);
             walls.LineTo(b);
@@ -92,9 +93,11 @@ internal class PolarGridRenderer(MazeStyles styles, RendererRegistry rendererReg
         if ((cell.HasInwardEdge || !cell.IsLinked(cell.Inward)) && !cell.IsVoid)
         {
             walls.MoveTo(a);
-            walls.ArcTo(new SKPoint(innerRadius, innerRadius), 0, SKPathArcSize.Small, SKPathDirection.CounterClockwise, c);
+            walls.ArcTo(new SKPoint(innerRadius, innerRadius),
+                0, SKPathArcSize.Small, SKPathDirection.Clockwise, c
+            );
         }
-        
+
         return walls;
     }
 

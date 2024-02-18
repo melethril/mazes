@@ -14,14 +14,14 @@ public static class CellAttributeExtensions
     public static SKColor GetOutlineColour(this CellStyle style) => 
         style.GetColour(StyleProperties.OutlineColour);
 
-    private static readonly SKColor lastResortColor = SKColors.LightGray;
+    private static readonly SKColor LastResortColor = SKColors.LightGray;
 
     public static SKColor GetColour(this CellStyle style, StyleProperty property)
     {
             if (string.IsNullOrWhiteSpace(property.Name))
                 throw new ArgumentException("property has no name");
 
-            SKColor defaultColour = ParseColour(property.DefaultValue, lastResortColor);
+            SKColor defaultColour = ParseColour(property.DefaultValue, LastResortColor);
 
             if (!style.Properties.TryGetValue(property.Name, out var value)) 
                 return defaultColour;
@@ -31,7 +31,7 @@ public static class CellAttributeExtensions
 
     public static SKColor ParseColour(object value, SKColor? defaultColour = null)
     {
-            defaultColour ??= lastResortColor;
+            defaultColour ??= LastResortColor;
 
             if (value is not string hexValue || string.IsNullOrWhiteSpace(hexValue)) 
                 return defaultColour.Value;
