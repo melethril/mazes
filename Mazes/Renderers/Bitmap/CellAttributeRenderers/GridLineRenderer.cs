@@ -15,6 +15,8 @@ internal class GridLineRenderer : ICellAttributeRenderer
         brush.StrokeWidth = 1;
         brush.PathEffect = SKPathEffect.CreateDash([4, 4], 0);
 
-        context.Canvas.DrawRect(context.Bounds, brush);
+        SKRectI rect = new(context.Bounds.Left, context.Bounds.Top, context.Bounds.Right, context.Bounds.Bottom);
+        
+        context.Canvas.DrawRect(rect, brush);
     }
 }

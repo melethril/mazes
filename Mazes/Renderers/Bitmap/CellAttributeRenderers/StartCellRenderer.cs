@@ -14,7 +14,7 @@ internal class StartCellRenderer : ICellAttributeRenderer
         var fgColour = context.Style.GetForegroundColour();
         var bgColour = context.Style.GetBackgroundColour();
 
-        context.RenderBackground(bgColour);
-        context.RenderText(text, fgColour);
+        context.Canvas.RenderBackground(bgColour, context.ContentBounds);
+        context.Canvas.RenderText(text, fgColour, context.Bounds);
     }
 }

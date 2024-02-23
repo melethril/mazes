@@ -9,6 +9,6 @@ internal class VoidCellRenderer : ICellAttributeRenderer
 
     public void Render(CellAttributeRenderingContext context)
     {
-        context.RenderBackground(SKColors.Transparent);
+        context.Canvas.RenderBackground(SKColors.Transparent, context.ContentBounds);
     }
 }

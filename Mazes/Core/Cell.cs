@@ -10,7 +10,7 @@ public abstract class Cell : ICell
     public bool IsPathable { get; }
 
     public abstract bool IsOnEdge { get; }
-    public bool IsOnOuterEdge { get; set; }
+    public virtual bool IsOnOuterEdge { get; set; }
     public bool IsDeadEnd => links.Count == 1;
     public bool IsVoid  => Attributes.Any(a => a.Type == CellAttributeType.IsVoid);
     public IList<CellAttribute> Attributes { get; } = [];

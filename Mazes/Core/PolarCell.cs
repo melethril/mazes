@@ -9,7 +9,16 @@ public class PolarCell(int row, int column, bool isPathable = true, IList<CellAt
 
     public IList<Cell> Outward { get; } = [];
 
-    public override bool IsOnEdge => !Outward.Any();
+    public override bool IsOnEdge => 
+        new[] { AntiClockwise, Clockwise, Inward }
+        .Concat(Outward)
+        .Any(c => c == null);
+
+    public override bool IsOnOuterEdge
+    {
+        get => !Outward.Any();
+        set => throw new InvalidOperationException();
+    }
 
     public override IEnumerable<ICell> Neighbours 
     {

@@ -4,10 +4,10 @@
   },
   "page": {
     "margin": 5,
-    "numPaddingCells": 1,
-    "wallWidth": 2,
-    "wallColour": "#756958",
-    "backgroundColour": "#c7bcab"
+    "numPaddingCells": 2,
+    "wallWidth": 4,
+    "wallColour": "#3c4653",
+    "backgroundColour": "#c3cad4"
   },
   "cells": {
     "attributes": [

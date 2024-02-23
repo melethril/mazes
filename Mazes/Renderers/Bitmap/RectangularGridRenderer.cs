@@ -43,14 +43,14 @@ public class RectangularGridRenderer(MazeStyles styles, RendererRegistry rendere
         return cellSize;
     }
     
-    private static SKRectI GetBoundsForCell(SKRectI mazeBounds, int cellSize, ICell cell)
+    private static IBounds GetBoundsForCell(SKRectI mazeBounds, int cellSize, ICell cell)
     {
-        return new(
-            left: mazeBounds.Left + (cell.ColumnIndex * cellSize),
-            top: mazeBounds.Top + (cell.RowIndex * cellSize),
-            right: mazeBounds.Left + ((cell.ColumnIndex + 1) * cellSize),
-            bottom: mazeBounds.Top + ((cell.RowIndex + 1) * cellSize)
-        );
+        int left = mazeBounds.Left + cell.ColumnIndex * cellSize;
+        int top = mazeBounds.Top + cell.RowIndex * cellSize;
+        int right = mazeBounds.Left + (cell.ColumnIndex + 1) * cellSize;
+        int bottom = mazeBounds.Top + (cell.RowIndex + 1) * cellSize;
+
+        return new RectangularBounds(left, top, right, bottom);
     }
 
     private void RenderCell(CellRenderingContext<RectangularCell> context)
@@ -71,12 +71,11 @@ public class RectangularGridRenderer(MazeStyles styles, RendererRegistry rendere
 
         // Define a smaller inner rectangle to account for wall widths
         int wallWidth = (int)wallBrush.StrokeWidth / 2;
-        SKRectI contentBounds = new(
+        var contentBounds = new RectangularBounds(
             cellBounds.Left + (cell.IsLinked(cell.West) ? 0 : wallWidth),
             cellBounds.Top + (cell.IsLinked(cell.North) ? 0 : wallWidth),
             cellBounds.Right - (cell.IsLinked(cell.East) ? 0 : wallWidth),
-            cellBounds.Bottom - (cell.IsLinked(cell.South) ? 0 : wallWidth)
-        );
+            cellBounds.Bottom - (cell.IsLinked(cell.South) ? 0 : wallWidth));
 
         var cellContext = new CellRenderingContext<Cell>(context.Styles, canvas, cellBounds, cell, contentBounds);
 
@@ -90,32 +89,32 @@ public class RectangularGridRenderer(MazeStyles styles, RendererRegistry rendere
         }
     }
 
-    private static SKPath BuildCellWalls(RectangularCell cell, SKRectI rect)
+    private static SKPath BuildCellWalls(RectangularCell cell, IBounds bounds)
     {
         SKPath path = new();
 
         if (cell is { HasNorthEdge: true, IsVoid: false })
         {
-            path.MoveTo(rect.Left, rect.Top);
-            path.LineTo(rect.Right, rect.Top);
+            path.MoveTo(bounds.Left, bounds.Top);
+            path.LineTo(bounds.Right, bounds.Top);
         }
 
         if (cell is { HasWestEdge: true, IsVoid: false })
         {
-            path.MoveTo(rect.Left, rect.Top);
-            path.LineTo(rect.Left, rect.Bottom);
+            path.MoveTo(bounds.Left, bounds.Top);
+            path.LineTo(bounds.Left, bounds.Bottom);
         }
 
         if ((cell.HasEastEdge || !cell.IsLinked(cell.East)) && !cell.IsVoid)
         {
-            path.MoveTo(rect.Right, rect.Top);
-            path.LineTo(rect.Right, rect.Bottom);
+            path.MoveTo(bounds.Right, bounds.Top);
+            path.LineTo(bounds.Right, bounds.Bottom);
         }
 
         if ((cell.HasSouthEdge || !cell.IsLinked(cell.South)) && !cell.IsVoid)
         {
-            path.MoveTo(rect.Left, rect.Bottom);
-            path.LineTo(rect.Right, rect.Bottom);
+            path.MoveTo(bounds.Left, bounds.Bottom);
+            path.LineTo(bounds.Right, bounds.Bottom);
         }
 
         return path;

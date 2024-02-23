@@ -10,7 +10,7 @@ internal class DefaultCellRenderer : ICellAttributeRenderer
     {
         if (!context.Cell.IsVoid)
         {
-            context.RenderBackground(context.Style.GetBackgroundColour());
+            context.Canvas.RenderBackground(context.Style.GetBackgroundColour(), context.ContentBounds);
         }
     }
 }

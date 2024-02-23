@@ -17,6 +17,6 @@ internal class IntensityRenderer : ICellAttributeRenderer
         byte bright = (byte)(128 + (127 * intensity));
         var colour = new SKColor(dark, bright, dark);
 
-        context.RenderBackground(colour);
+        context.Canvas.RenderBackground(colour, context.ContentBounds);
     }
 }

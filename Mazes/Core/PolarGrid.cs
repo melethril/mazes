@@ -46,11 +46,18 @@ public class PolarGrid : Grid
 
             if (rowIndex > 0)
             {
-                int ratio = GetRow(rowIndex).Length / GetRow(rowIndex - 1).Length;
+                int rowLength = GetRow(rowIndex).Length;
+                int ratio = rowLength / GetRow(rowIndex - 1).Length;
                 var parent = (PolarCell)GetCell(rowIndex - 1, colIndex / ratio);
 
-                cell.Clockwise = IsInBounds(rowIndex, colIndex + 1) ? GetCell(rowIndex, colIndex + 1) : null;
-                cell.AntiClockwise = IsInBounds(rowIndex, colIndex - 1) ? GetCell(rowIndex, colIndex - 1) : null;
+                cell.Clockwise = IsInBounds(rowIndex, colIndex + 1) 
+                    ? GetCell(rowIndex, colIndex + 1) 
+                    : GetCell(rowIndex, 0);
+                
+                cell.AntiClockwise = IsInBounds(rowIndex, colIndex - 1) 
+                    ? GetCell(rowIndex, colIndex - 1) 
+                    : GetCell(rowIndex, rowLength - 1);
+                
                 parent.Outward.Add(cell);
                 cell.Inward = parent;
             }

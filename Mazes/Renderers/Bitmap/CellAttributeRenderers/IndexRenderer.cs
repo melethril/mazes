@@ -13,6 +13,6 @@ internal class IndexRenderer : ICellAttributeRenderer
 
         var fgColour = context.Style.GetForegroundColour();
 
-        context.RenderText(text, fgColour);
+        context.Canvas.RenderText(text, fgColour, context.Bounds);
     }
 }

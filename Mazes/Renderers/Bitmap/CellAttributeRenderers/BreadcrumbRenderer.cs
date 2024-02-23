@@ -11,10 +11,10 @@ internal class BreadcrumbRenderer : ICellAttributeRenderer
     public void Render(CellAttributeRenderingContext context)
     {
         var bounds = context.Bounds;
-        int pillSize = Math.Max(bounds.Width / 6, MinPillSize);
-        int centreX = bounds.Left + (bounds.Width / 2);
-        int centreY = bounds.Top + (bounds.Height / 2);
-        var point = new SKPoint(centreX, centreY);
+        
+        decimal fractionOfCell = bounds is CircularBounds ? 0.04m : 0.08m;
+        int pillSize = Math.Max((int)(bounds.Height * fractionOfCell), MinPillSize);
+        var point = new SKPoint(bounds.Centre.X, bounds.Centre.Y);
 
         using var fill = new SKPaint();
         fill.Style = SKPaintStyle.Fill;

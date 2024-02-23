@@ -1,15 +1,16 @@
-﻿using Mazes.Algorithms;
-using Mazes.Core;
+﻿using Mazes.Core;
 using Mazes.Utils;
 
 namespace MazeTool;
 
-internal static class Program
+internal static partial class Program
 {
     private static async Task Main(string[] args)
     {
         try
         {
+            //Scratchpad();
+            
             var options = MazeOptions.Parse(args);
             var imageSize = Dimensions.Screen1280X1024;
 
@@ -21,8 +22,9 @@ internal static class Program
             var path = grid.CalculateLongestPath(startOnEdge: true, endOnEdge: true);
 
             // Decorate the maze
+            //grid.ShowIndexes();
             grid.ShowStartAndEnd(path.start, path.end);
-            grid.ShowPath(path.path, path.start, path.end);
+            //grid.ShowPath(path.path, path.start, path.end);
             //grid.ShowDistances(path.distances);
             //grid.ShowDistanceHeatMap(path.distances);
 
@@ -46,10 +48,11 @@ internal static class Program
 
         var topology = options.Polar ? MazeTopology.Polar : MazeTopology.Rectangular;
 
-        return MazeDescriptor.Specific(
-            new RecursiveBacktrackerAlgorithm(),
-            topology, (options.Rows, options.Columns), 1234, mask
-        );
+        // return MazeDescriptor.Specific(
+        //     new RecursiveBacktrackerAlgorithm(),
+        //     topology, (options.Rows, options.Columns), 4321, mask
+        // );
+        return MazeDescriptor.Random(topology, (options.Rows, options.Columns), mask);
     }
 
     private static async Task OutputMaze(MazeOptions options, Dimensions imageSize, IGrid grid)

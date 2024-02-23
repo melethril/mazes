@@ -13,6 +13,6 @@ internal class DistanceRenderer : ICellAttributeRenderer
 
         var fgColour = context.Style.GetForegroundColour();
 
-        context.RenderText(text, fgColour);
+        context.Canvas.RenderText(text, fgColour, context.Bounds);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Mazes.Core;
+using Mazes.Renderers.Bitmap.RenderingContexts;
 using SkiaSharp;
 
 namespace Mazes.Renderers.Bitmap;
@@ -9,103 +10,99 @@ internal class PolarGridRenderer(MazeStyles styles, RendererRegistry rendererReg
     {
         var grid = polarGrid as PolarGrid ?? throw new ArgumentException("grid is not a PolarGrid");
 
-        var centre = new SKPointI(
-            x: pageBounds.Left + (pageBounds.Width / 2),
-            y: pageBounds.Top + (pageBounds.Height / 2)
+        var centre = new Point(
+            X: pageBounds.Left + (pageBounds.Width / 2),
+            Y: pageBounds.Top + (pageBounds.Height / 2)
         );
 
         int cellSize = Math.Min(pageBounds.Width, pageBounds.Height) /
                        ((grid.RowCount * 2) + (styles.Page.NumPaddingCells * 2));
 
-        using SKPaint wallBrush = new();
-        wallBrush.IsStroke = true;
-        wallBrush.Color = SKColor.Parse(styles.Page.WallColour);
-        wallBrush.StrokeWidth = styles.Page.WallWidth;
-        wallBrush.IsAntialias = true;
-
-        canvas.DrawCircle(centre.X, centre.Y, (grid.RowCount) * cellSize, wallBrush);
+        int wallWidth = styles.Page.WallWidth;
+        using var wallBrush = GetWallBrush(wallWidth);
 
         foreach (var cell in grid.AllCells.Cast<PolarCell>())
         {
-            double theta = 2 * Math.PI / grid.GetRow(cell.RowIndex).Length;
-            double thetaAntiClockwise = (cell.ColumnIndex) * theta;
-            double thetaClockwise = (cell.ColumnIndex + 1) * theta;
-
-            int innerRadius = (cell.RowIndex) * cellSize;
-            int outerRadius = (cell.RowIndex + 1) * cellSize;
-
-            var a = GetPoint(centre, innerRadius, thetaAntiClockwise);
-            var b = GetPoint(centre, outerRadius, thetaAntiClockwise);
-            var c = GetPoint(centre, innerRadius, thetaClockwise);
-            var d = GetPoint(centre, outerRadius, thetaClockwise);
-
-            var walls = BuildCellWalls(cell, a, b, c, d, innerRadius, outerRadius);
-            canvas.DrawPath(walls, wallBrush);
+            var cellBounds = GetCellBounds(grid, cell, cellSize, centre);
+            var cellContext = new CellRenderingContext<PolarCell>(styles, canvas, cellBounds, cell, cellBounds);
             
-            // Define a smaller inner rectangle to account for wall widths
-            // int wallWidth = (int)wallBrush.StrokeWidth / 2;
-            // SKRectI contentBounds = new(
-            //     cellBounds.Left + (cell.IsLinked(cell.West) ? 0 : wallWidth),
-            //     cellBounds.Top + (cell.IsLinked(cell.North) ? 0 : wallWidth),
-            //     cellBounds.Right - (cell.IsLinked(cell.East) ? 0 : wallWidth),
-            //     cellBounds.Bottom - (cell.IsLinked(cell.South) ? 0 : wallWidth)
-            // );
-            //
-            // var cellContext = new CellRenderingContext<Cell>(context.Styles, canvas, cellBounds, cell, contentBounds);
-            //
-            // // For each attribute that the cell has, render it using the renderer for that attribute
-            // var attributesAndRenderers = rendererRegistry.GetRenderers(cell.Attributes);
-            // foreach (var (attribute, renderer) in attributesAndRenderers)
-            // {
-            //     var attrContext = cellContext.ForAttribute(attribute, renderer);
-            //     
-            //     renderer.Render(attrContext);
-            // }
+            // For each attribute that the cell has, render it using the renderer for that attribute
+            var attributesAndRenderers = rendererRegistry.GetRenderers(cell.Attributes);
+            foreach (var (attribute, renderer) in attributesAndRenderers)
+            {
+                renderer.Render(cellContext.ForAttribute(attribute, renderer));
+            }
+            
+            var walls = BuildCellWalls(cell, cellBounds, wallWidth);
+            canvas.DrawPath(walls, wallBrush);
         }
+        
+        canvas.DrawCircle(centre.X, centre.Y, (grid.RowCount) * cellSize, wallBrush);
     }
 
-    private static SKPath BuildCellWalls(
-        PolarCell cell, SKPointI a, SKPointI b, SKPointI c, SKPointI d,
-        int innerRadius, int outerRadius)
+    private SKPaint GetWallBrush(int wallWidth)
+    {
+        SKPaint wallBrush = new();
+        wallBrush.Style = SKPaintStyle.Stroke;
+        wallBrush.Color = SKColor.Parse(styles.Page.WallColour);
+        wallBrush.StrokeWidth = wallWidth;
+        wallBrush.StrokeCap = SKStrokeCap.Butt;
+        wallBrush.IsAntialias = true;
+        
+        return wallBrush;
+    }
+
+    private static IBounds GetCellBounds(PolarGrid grid, PolarCell cell, int cellSize, Point centre)
+    {
+        double theta = 2 * Math.PI / grid.GetRow(cell.RowIndex).Length;
+        double thetaAntiClockwise = (cell.ColumnIndex) * theta;
+        double thetaClockwise = (cell.ColumnIndex + 1) * theta;
+
+        int innerRadius = (cell.RowIndex) * cellSize;
+        int outerRadius = (cell.RowIndex + 1) * cellSize;
+
+        return cell.RowIndex == 0
+            ? new CircularBounds(new(centre.X, centre.Y), outerRadius)
+            : new ArcBounds(thetaClockwise, thetaAntiClockwise, innerRadius, outerRadius, centre);
+    }
+
+    private static SKPath BuildCellWalls(PolarCell cell, IBounds bounds, int wallWidth)
     {
         SKPath walls = new();
 
-        if ((cell.HasOutwardEdge || !cell.Outward.Any(cell.IsLinked)) && !cell.IsVoid)
+        if (bounds is ArcBounds arc)
         {
-            walls.MoveTo(b);
-            walls.ArcTo(new SKPoint(outerRadius, outerRadius),
-                0, SKPathArcSize.Small, SKPathDirection.Clockwise, d
-            );
-        }
+            if ((cell.HasInwardEdge || !cell.IsLinked(cell.Inward)) && !cell.IsVoid)
+            {
+                var segment = arc.Segments[2];
+                walls.MoveTo(segment.Start);
 
-        if ((cell.HasAntiClockwiseEdge || !cell.IsLinked(cell.AntiClockwise)) && !cell.IsVoid)
-        {
-            walls.MoveTo(a);
-            walls.LineTo(b);
-        }
+                float radius = segment.Type.Radius;
+                walls.ArcTo(new SKPoint(radius, radius),
+                    0, SKPathArcSize.Small, SKPathDirection.CounterClockwise, segment.End
+                );
+            }
 
-        if ((cell.HasClockwiseEdge || !cell.IsLinked(cell.Clockwise)) && !cell.IsVoid)
-        {
-            walls.MoveTo(c);
-            walls.LineTo(d);
-        }
-
-        if ((cell.HasInwardEdge || !cell.IsLinked(cell.Inward)) && !cell.IsVoid)
-        {
-            walls.MoveTo(a);
-            walls.ArcTo(new SKPoint(innerRadius, innerRadius),
-                0, SKPathArcSize.Small, SKPathDirection.Clockwise, c
-            );
+            if ((cell.HasAntiClockwiseEdge || !cell.IsLinked(cell.AntiClockwise)) && !cell.IsVoid)
+            {
+                var segment = arc.Segments[3];
+                var adjustedStart = GetAdjustedPoint(cell, segment.Start, wallWidth);
+                var adjustedEnd = GetAdjustedPoint(cell, segment.End, wallWidth);
+                
+                walls.MoveTo(adjustedStart);
+                walls.LineTo(adjustedEnd);
+            }
         }
 
         return walls;
     }
 
-    private static SKPointI GetPoint(SKPointI centre, int radius, double theta)
+    private static Point GetAdjustedPoint(PolarCell cell, Point point, int wallWidth)
     {
-        int x = centre.X + (int)(radius * Math.Cos(theta));
-        int y = centre.Y + (int)(radius * Math.Sin(theta));
+        var adjustedStart = cell.ColumnIndex == 0 
+            ? point with { Y = point.Y + (wallWidth / 2) }
+            : point;
 
-        return new SKPointI(x, y);
+        return adjustedStart;
     }
 }

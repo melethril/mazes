@@ -4,14 +4,36 @@ namespace Mazes.Renderers.Bitmap;
 
 internal static class CanvasExtensions
 {
-    public static void DrawCenteredText(this SKCanvas canvas, SKRectI bounds, string value, int textSize, SKPaint pen)
+    public static void RenderBackground(this SKCanvas canvas, SKColor colour, IBounds bounds)
     {
-            int centreY = bounds.Top + (bounds.Width / 2) + (textSize / 2);
+        using SKPaint paint = new();
+        paint.StrokeWidth = 0;
+        paint.Style = SKPaintStyle.Fill;
+        paint.Color = colour;
+        paint.IsAntialias = true;
 
-            var textPath = new SKPath();
-            textPath.MoveTo(bounds.Left, centreY);
-            textPath.LineTo(bounds.Right, centreY);
+        canvas.DrawPath(bounds.ToSKPath(), paint);
+    }
 
-            canvas.DrawTextOnPath(value, textPath, new(0, 0), pen);
-        }
+    public static void RenderText(this SKCanvas canvas, string text, SKColor colour, IBounds bounds)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        
+        const float fractionOfCell = 0.25f;
+        float textSize = ((bounds is ArcBounds ? bounds.Height : bounds.Width) * fractionOfCell);
+
+        using SKPaint pen = new();
+        pen.Style = SKPaintStyle.Fill;
+        pen.Color = colour;
+        pen.StrokeWidth = 1;
+        pen.IsAntialias = true;
+        pen.TextAlign = SKTextAlign.Center;
+        pen.TextSize = textSize;
+
+        using var textPath = new SKPath();
+        textPath.MoveTo(bounds.Left, bounds.Centre.Y);
+        textPath.LineTo(bounds.Right, bounds.Centre.Y);
+
+        canvas.DrawTextOnPath(text, textPath, new(0, 0), pen);
+    }
 }

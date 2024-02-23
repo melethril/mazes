@@ -23,7 +23,7 @@ public class MazeDescriptor
         Mask = mask;
     }
    
-    public static MazeDescriptor Specific(IMazeAlgorithm algorithm, MazeTopology topology, (int rows, int cols) size, int? seed, Mask? mask)
+    public static MazeDescriptor Specific(IMazeAlgorithm algorithm, MazeTopology topology, (int rows, int cols) size, int seed, Mask? mask)
     {
         return new MazeDescriptor(algorithm, topology, size, seed, mask);
     }
