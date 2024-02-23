@@ -7,6 +7,7 @@ internal static partial class Program
     /// <summary>
     /// For testing canvas drawing behaviour
     /// </summary>
+    // ReSharper disable once UnusedMember.Local
     private static void Scratchpad()
     {
         var imageInfo = new SKImageInfo(
