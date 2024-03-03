@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MazeTool": {
+      "commandName": "Project",
+      "commandLineArgs": "--outdir c:\\users\\marti\\downloads\\mazes\r\n--stylesfile C:\\Users\\marti\\Documents\\Dev\\mazes\\mazes\\styles.json\r\n--rows 20\r\n--topology hex\r\n"
+    }
+  }
+}

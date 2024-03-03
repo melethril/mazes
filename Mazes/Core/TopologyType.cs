@@ -2,5 +2,8 @@
 
 public enum TopologyType
 {
-    Rectangular, Polar
+    Rectangular,
+    Polar,
+    Sigma,
+    Triangular,
 }

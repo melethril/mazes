@@ -26,6 +26,7 @@ public class ImageRenderer(MazeStyles styles, RendererRegistry rendererRegistry)
             SimpleGrid => new RectangularGridRenderer(styles, rendererRegistry),
             MaskedGrid => new RectangularGridRenderer(styles, rendererRegistry),
             PolarGrid => new PolarGridRenderer(styles, rendererRegistry),
+            HexGrid => new HexGridRenderer(styles, rendererRegistry),
             
             _ => throw new ArgumentOutOfRangeException(nameof(grid), grid, null)
         };

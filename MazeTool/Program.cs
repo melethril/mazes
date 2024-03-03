@@ -46,7 +46,7 @@ internal static partial class Program
             mask = Mask.LoadFrom(file).ScaleUp(2, 2);
         }
 
-        var topology = options.Polar ? MazeTopology.Polar : MazeTopology.Rectangular;
+        var topology = MazeTopology.Parse(options.Topology);
 
         // return MazeDescriptor.Specific(
         //     new RecursiveBacktrackerAlgorithm(),
